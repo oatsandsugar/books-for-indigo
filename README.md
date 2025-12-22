@@ -1,5 +1,5 @@
 # books-for-indigo
-A list of books I've read to my baby
+A list of books I've read to my baby. Incomplete, but trying to catch as many as I can!
 
 ## Picture Books
 
