@@ -7,14 +7,18 @@ A list of books I've read to my baby. Incomplete, but trying to catch as many as
 * The Garden of Abdul Gasazi by Chris Van Allsburg (1979)
 * Jumanji by Chris Van Allsburg (1981)
 * How the Birds Got Their Colours by Mary Albert (Author), Pamela Lofts (Illustrator) (1983)
-* Owl Moon by Jane Yolen (Author), John Schoenherr (Illustrator) (1987)
-* Lon Po Po by Ed Young (1989)
+* Animalia by Graeme Base (1986) ⭐
+* Owl Moon by Jane Yolen (Author), John Schoenherr (Illustrator) (1987) ⭐
+* Lon Po Po by Ed Young (1989) ⭐
 * We're Going on a Bear Hunt by Michael Rosen (Author), Helen Oxenbury (Illustrator) (1989)
-* Hershel and the Hanukkah Goblins by Eric A. Kimmel (Author), Trina Schart Hyman (Illustrator) (1989)
+* Hershel and the Hanukkah Goblins by Eric A. Kimmel (Author), Trina Schart Hyman (Illustrator) (1989) ⭐
+* The Eleventh Hour by Graeme Base (1989) ⭐
+* Magic Beach by Alison Lester (1990) ⭐
 * Who Killed Cock Robin by Kevin O'Malley (1993)
 * Warnayarra the Rainbow Snake by Senior Boys' Class, Lajamanu School (Authors), Pamela Lofts (Compiler) (1995)
-* Golem by David Wisniewski (1996)
-* Zin Zin Zin a Violin by Lloyd Moss (Author), Marjorie Priceman (Illustrator) (2000)
+* Golem by David Wisniewski (1996) ⭐
+* 10 Oni Drummers by Matthew Gollub (Author), Kazuko G. Stone (Illustrator) (2000) ⭐
+* Zin Zin Zin a Violin by Lloyd Moss (Author), Marjorie Priceman (Illustrator) (2000) ⭐
 * The Water Hole by Graeme Base (2001)
 * You Look Yummy! by Tatsuya Miyanishi (2003)
 * Don't Let the Pigeon Drive the Bus! by Mo Willems (2003)
@@ -23,12 +27,13 @@ A list of books I've read to my baby. Incomplete, but trying to catch as many as
 * Watch Me Throw the Ball! by Mo Willems (2009)
 * Firebird by Saviour Pirotta (Author), Catherine Hyde (Illustrator) (2010)
 * We Are in a Book! by Mo Willems (2010)
+* Rudie Nudie by Emma Quay (2011) ⭐
 * I Will Love You Forever by Tatsuya Miyanishi (2011)
 * Spent a Day with Thoreau at Walden Pond by Robert Burleigh (Author), Wendell Minor (Illustrator) (2012)
 * Rules of Summer by Shaun Tan (2013)
-* Locomotive by Brian Floca (2013)
+* Locomotive by Brian Floca (2013) ⭐
 * The Adventures of Beekle: The Unimaginary Friend by Dan Santat (2014)
-* Du Iz Tak? by Carson Ellis (2016)
+* Du Iz Tak? by Carson Ellis (2016) ⭐
 * Red Rover: Curiosity on Mars by Richard Ho (Author), Katherine Roy (Illustrator) (2017)
 * XO, Ox: A Love Story by Scott Campbell (2017)
 * Crunch: The Shy Dinosaur by Cirocco Dunlap (Author), Greg Pizzoli (Illustrator) (2018)
@@ -48,7 +53,7 @@ A list of books I've read to my baby. Incomplete, but trying to catch as many as
 * The Big Bath House by Kyo Maclear (Author), Gracey Zhang (Illustrator) (2021)
 * Mel Fell by Corey R. Tabor (2021)
 * The Boy and the Elephant by Freya Blackwood (2021)
-* Dalmatian: A Mars Rover's Story by Lucy Ruth Cummins (2022)
+* Dalmartian: A Mars Rover's Story by Lucy Ruth Cummins (2022)
 * The Baddies by Julia Donaldson (Author), Axel Scheffler (Illustrator) (2022)
 * Awake, Asleep by Kyle Lukoff (Author), Nadia Alam (Illustrator) (2022)
 * Color the Sky by David Elliott (Author), Evan Turk (Illustrator) (2022)
@@ -56,7 +61,7 @@ A list of books I've read to my baby. Incomplete, but trying to catch as many as
 * I Will Survive by Frederick J. Perren and Dino Fekaris (Authors), Kaitlyn Shea O'Connor (Illustrator) (2022)
 * Shabbat Is...: A Special Day Celebrated in Many Ways by A. J. Sass (Author), Noa Kelner (Illustrator) (2022)
 * The Impossible Mountain by David Soman (2022)
-* Don't Trust Fish by Neil Sharpson (Author), Dan Santat (Illustrator) (2022)
+* Don't Trust Fish by Neil Sharpson (Author), Dan Santat (Illustrator) (2022) ⭐
 * Hekla & Laki by Marine Schneider (2023)
 * Hidden Gem by Linda Liu (2023)
 * Little Rebels by Yuyi Morales (2023)
