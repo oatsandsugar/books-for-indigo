@@ -54,4 +54,24 @@ document.querySelectorAll('li[data-caldecott-medal], li[data-caldecott-honor]')
 // Titles of all Caldecott honorees from the 1990s
 [...document.querySelectorAll('li[data-caldecott-honor][data-year^="199"]')]
   .map(li => li.querySelector('cite').textContent)
+
+// Caldecott Medal years you've read
+[...document.querySelectorAll('li[data-caldecott-medal]')]
+  .map(li => li.dataset.caldecottMedal).sort()
+
+// Caldecott Medal years you're missing
+const read = new Set([...document.querySelectorAll('li[data-caldecott-medal]')]
+  .map(li => li.dataset.caldecottMedal));
+Array.from({length: 2026-1938+1}, (_, i) => String(1938+i))
+  .filter(y => !read.has(y))
+
+// Decade with the most starred books
+Object.entries(
+  [...document.querySelectorAll('li[data-starred]')]
+    .reduce((acc, li) => {
+      const d = Math.floor(li.dataset.year / 10) * 10 + 's';
+      acc[d] = (acc[d] || 0) + 1;
+      return acc;
+    }, {})
+).sort((a, b) => b[1] - a[1])[0]
 ```
