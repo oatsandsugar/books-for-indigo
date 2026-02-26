@@ -38,4 +38,20 @@ document.querySelectorAll('.author')
 
 // Roles (Author, Illustrator, Compiler, etc.)
 document.querySelectorAll('.role')
+
+// Caldecott Medal winners
+document.querySelectorAll('li[data-caldecott-medal]')
+
+// Caldecott Honor books
+document.querySelectorAll('li[data-caldecott-honor]')
+
+// NYT Best Illustrated
+document.querySelectorAll('li[data-nyt-illustrated]')
+
+// Any Caldecott (medal or honor)
+document.querySelectorAll('li[data-caldecott-medal], li[data-caldecott-honor]')
+
+// Titles of all Caldecott honorees from the 1990s
+[...document.querySelectorAll('li[data-caldecott-honor][data-year^="199"]')]
+  .map(li => li.querySelector('cite').textContent)
 ```
