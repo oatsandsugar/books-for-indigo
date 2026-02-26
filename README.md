@@ -2,8 +2,12 @@
 A list of books I've read to my baby. Incomplete, but trying to catch as many as I can!
 
 ## Picture Books
+* The Snowy Day by Ezra Jack Keats (1962) ⭐
+* Where the Wild Things Are by Maurice Sendak (1963) ⭐
 * Fox in Socks by Dr. Seuss (1965)
 * Frederick by Leo Lionni (1967)
+* Arm in Arm by Remy Charlip (1969) ⭐
+* Anansi the Spider by Gerald McDermott (1972)
 * The Garden of Abdul Gasazi by Chris Van Allsburg (1979)
 * Jumanji by Chris Van Allsburg (1981)
 * How the Birds Got Their Colours by Mary Albert (Author), Pamela Lofts (Illustrator) (1983)
@@ -14,7 +18,10 @@ A list of books I've read to my baby. Incomplete, but trying to catch as many as
 * Hershel and the Hanukkah Goblins by Eric A. Kimmel (Author), Trina Schart Hyman (Illustrator) (1989) ⭐
 * The Eleventh Hour by Graeme Base (1989) ⭐
 * Magic Beach by Alison Lester (1990) ⭐
+* Tuesday by David Wiesner (1991)
+* Window by Jeannie Baker (1991) ⭐
 * Who Killed Cock Robin by Kevin O'Malley (1993)
+* Grandfather's Journey by Allen Say (1993)
 * Warnayarra the Rainbow Snake by Senior Boys' Class, Lajamanu School (Authors), Pamela Lofts (Compiler) (1995)
 * Golem by David Wisniewski (1996) ⭐
 * 10 Oni Drummers by Matthew Gollub (Author), Kazuko G. Stone (Illustrator) (2000) ⭐
@@ -43,6 +50,7 @@ A list of books I've read to my baby. Incomplete, but trying to catch as many as
 * Birdsong by Julie Flett (2019)
 * Moth: An Evolution Story by Isabel Thomas (Author), Daniel Egnéus (Illustrator) (2019)
 * Clear and Bright: A Ching Ming Festival Story by Teresa Robeson (Author), William Low (Illustrator) (2019)
+* The Shortest Day by Susan Cooper (Author), Carson Ellis (Illustrator) (2019) ⭐
 * Together by Isabel Otter (Author), Clover Robin (Illustrator) (2019)
 * The Blue House by Phoebe Wahl (2020)
 * One of a Kind: A Story About Sorting and Classifying by Neil Packer (2020)
