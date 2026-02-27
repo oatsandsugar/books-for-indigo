@@ -4,7 +4,10 @@ Books I've read to Indigo, hosted at [readingstori.es](https://readingstori.es).
 
 This is an incomplete list.
 
-**Conventions:** ⭐ = starred favourites, `(currently reading)` = in progress.
+**Conventions:**
+- ⭐ = starred favourites, `(currently reading)` = in progress.
+- **Credits:** Solo author-illustrators get plain `by Name`. Collaborations get explicit role labels: `by Name (Author), Name (Illustrator)`.
+- **Dates:** First publication year. For translations: `(YEAR, English translation YEAR)`.
 
 ## Suggest a book
 
@@ -75,3 +78,7 @@ Object.entries(
     }, {})
 ).sort((a, b) => b[1] - a[1])[0]
 ```
+
+## Formerly Featured Quotes
+
+- "Books are a uniquely portable magic." — Stephen King, *On Writing: A Memoir of the Craft* (2000)
