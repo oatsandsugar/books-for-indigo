@@ -5,7 +5,7 @@
   <meta name="color-scheme" content="dark light">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <title>Books for Indigo</title>
-  <style>body { font-family: monospace; }</style>
+  <style>body { font-family: monospace; } details > :not(summary) { margin-left: 1.2em; } details { font-size: small; }</style>
 </head>
 <body>
   <h1>Books for Indigo</h1>
@@ -143,9 +143,31 @@
   <hr>
   <marquee>"A children's story that can only be enjoyed by children is not a good children's story in the slightest." — C.S. Lewis, <cite>On Three Ways of Writing for Children</cite> (1952)</marquee>
   <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a></p>
-  <p>Last updated: Feb 2026</p>
+  <p><small>Last updated: Feb 2026</small></p>
   <p><small>© Johanan Ottensooser. <a href="https://github.com/oatsandsugar/books-for-indigo/blob/main/LICENSE">MIT License</a>.</small></p>
 
-  <p><i>P.S. Our bedtime routine is one or two picture books, a poem from a poetry book, then we put Indi in her crib and read her chapter book till she says "night night."</i></p>
+  <p><small><i>P.S. Our bedtime routine is one or two picture books, a poem from a poetry book, then we put Indi in her crib and read her chapter book till she says "night night."</i></small></p>
+
+  <details>
+    <summary><small><i>P.P.S. 🥚 This page has rich data</i></small></summary>
+    <p>Every book has structured HTML attributes you can query in the browser console:</p>
+    <ul>
+      <li><code>data-year</code> — publication year</li>
+      <li><code>data-starred</code> — favourite</li>
+      <li><code>data-status</code> — "read" or "reading"</li>
+      <li><code>data-caldecott-medal</code> / <code>data-caldecott-honor</code> — Caldecott award year</li>
+      <li><code>data-nyt-illustrated</code> — NYT Best Illustrated year</li>
+    </ul>
+    <p>Try these in your browser console:</p>
+    <pre>// All starred books
+document.querySelectorAll('li[data-starred]')
+
+// Books from the 1990s
+document.querySelectorAll('li[data-year^="199"]')
+
+// Caldecott winners
+document.querySelectorAll('li[data-caldecott-medal]')</pre>
+    <p>See the <a href="https://github.com/oatsandsugar/books-for-indigo#extracting-data">README</a> for more queries.</p>
+  </details>
 </body>
 </html>
