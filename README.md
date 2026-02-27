@@ -13,6 +13,10 @@ This is an incomplete list. The page works fully without JavaScript — JS is op
 
 Got a recommendation? [Open an issue](https://github.com/oatsandsugar/books-for-indigo/issues/new)!
 
+## Webring
+
+Looking for other nerdy parents who maintain personal sites or book lists — would love to start a webring. If that's you, [open an issue](https://github.com/oatsandsugar/books-for-indigo/issues/new?title=Webring%20-%20let%27s%20link%20up!&labels=webring&body=My%20homepage%3A%20)!
+
 ## Extracting data
 
 The HTML is structured for easy scraping with `querySelectorAll`:
