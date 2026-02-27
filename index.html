@@ -140,16 +140,20 @@
     <li data-year="2002" data-status="read"><cite>Lullabies and Poems for Children</cite> by <span class="author">Diana Secker Larson</span> (<span class="role">Editor</span>) (2002)</li>
   </ul>
 
+  <!-- Footer -->
   <hr>
   <marquee>"A children's story that can only be enjoyed by children is not a good children's story in the slightest." — C.S. Lewis, <cite>On Three Ways of Writing for Children</cite> (1952)</marquee>
+
   <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a></p>
   <p><small>Last updated: Feb 2026</small></p>
   <p><small>© Johanan Ottensooser. <a href="https://github.com/oatsandsugar/books-for-indigo/blob/main/LICENSE">MIT License</a>.</small></p>
 
   <p><small><i>P.S. Our bedtime routine is one or two picture books, a poem from a poetry book, then we put Indi in her crib and read her chapter book till she says "night night."</i></small></p>
 
+  <!-- Easter egg: rich data explainer & stats -->
   <details>
     <summary><small><i>P.P.S. 🥚 This page has rich data</i></small></summary>
+
     <p>Every book has structured HTML attributes you can query in the browser console:</p>
     <ul>
       <li><code>data-year</code> — publication year</li>
@@ -158,6 +162,7 @@
       <li><code>data-caldecott-medal</code> / <code>data-caldecott-honor</code> — Caldecott award year</li>
       <li><code>data-nyt-illustrated</code> — NYT Best Illustrated year</li>
     </ul>
+
     <p>Try these in your browser console:</p>
     <pre>// All starred books
 document.querySelectorAll('li[data-starred]')
@@ -167,8 +172,12 @@ document.querySelectorAll('li[data-year^="199"]')
 
 // Caldecott winners
 document.querySelectorAll('li[data-caldecott-medal]')</pre>
+
     <p>See the <a href="https://github.com/oatsandsugar/books-for-indigo#extracting-data">README</a> for more queries.</p>
+
+    <!-- Stats meters (hardcoded fallbacks, updated by JS below) -->
     <p>Caldecott Medal collection: <meter id="caldecott" value="15" max="89" title="15/89">15/89</meter> 15/89</p>
+
     <p>Stars per decade:</p>
     <ul id="decade-meters">
       <li>1900s: <meter value="0" max="0">0/0</meter> 0/0</li>
@@ -186,14 +195,35 @@ document.querySelectorAll('li[data-caldecott-medal]')</pre>
       <li>2020s: <meter value="5" max="46">5/46</meter> 5/46</li>
     </ul>
   </details>
+
+  <!-- Optional JS: updates meters from live data. Page works without this. -->
   <script>
-    var c=document.getElementById('caldecott');
-    c.value=document.querySelectorAll('li[data-caldecott-medal]').length;
-    var all=document.querySelectorAll('li[data-year]');
-    var decades={};
-    all.forEach(function(li){var y=parseInt(li.dataset.year);if(y<=0)return;var d=Math.floor(y/10)*10+'s';if(!decades[d])decades[d]={t:0,s:0};decades[d].t++;if(li.hasAttribute('data-starred'))decades[d].s++});
-    var items=document.querySelectorAll('#decade-meters li');
-    items.forEach(function(li){var label=li.textContent.split(':')[0].trim();var d=decades[label];if(d){var m=li.querySelector('meter');m.value=d.s;m.max=d.t;li.lastChild.textContent=' '+d.s+'/'+d.t}});
+    // Update Caldecott meter
+    var caldecott = document.getElementById('caldecott');
+    caldecott.value = document.querySelectorAll('li[data-caldecott-medal]').length;
+
+    // Tally stars and totals per decade
+    var decades = {};
+    document.querySelectorAll('li[data-year]').forEach(function(li) {
+      var year = parseInt(li.dataset.year);
+      if (year <= 0) return;
+      var decade = Math.floor(year / 10) * 10 + 's';
+      if (!decades[decade]) decades[decade] = { total: 0, starred: 0 };
+      decades[decade].total++;
+      if (li.hasAttribute('data-starred')) decades[decade].starred++;
+    });
+
+    // Update each decade meter
+    document.querySelectorAll('#decade-meters li').forEach(function(li) {
+      var label = li.textContent.split(':')[0].trim();
+      var data = decades[label];
+      if (data) {
+        var meter = li.querySelector('meter');
+        meter.value = data.starred;
+        meter.max = data.total;
+        li.lastChild.textContent = ' ' + data.starred + '/' + data.total;
+      }
+    });
   </script>
 </body>
 </html>
