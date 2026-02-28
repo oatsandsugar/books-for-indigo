@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Books for Indigo</title>
+    <link>https://readingstori.es</link>
+    <description>New books added to the list</description>
+    <atom:link href="https://readingstori.es/feed.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title>Witch Hazel by Molly Idle (2022)</title>
+      <link>https://readingstori.es</link>
+      <guid>witch-hazel-2022</guid>
+      <pubDate>Fri, 28 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
+
+    <item>
+      <title>Myths of China by Xiaobing Wang &amp; Katie Ponder (2024)</title>
+      <link>https://readingstori.es</link>
+      <guid>myths-of-china-2024</guid>
+      <pubDate>Fri, 28 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
+
+    <item>
+      <title>Stomp and Chomp: My First Book of Dinosaurs by Simon Mole &amp; Matt Hunt (2023)</title>
+      <link>https://readingstori.es</link>
+      <guid>stomp-and-chomp-2023</guid>
+      <pubDate>Fri, 28 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
+
+    <item>
+      <title>⭐ Fireworks by Matthew Burgess &amp; Cátia Chien (2025)</title>
+      <link>https://readingstori.es</link>
+      <guid>fireworks-2025</guid>
+      <pubDate>Sat, 22 Feb 2026 00:00:00 +0000</pubDate>
+      <description>Caldecott Medal 2026 · NYT Best Illustrated 2025</description>
+    </item>
+
+    <item>
+      <title>⭐ If You Make a Call on a Banana Phone by Gideon Sterer &amp; Emily Hughes (2025)</title>
+      <link>https://readingstori.es</link>
+      <guid>banana-phone-2025</guid>
+      <pubDate>Sat, 22 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
+
+    <item>
+      <title>The Bear Out There by Jess Hannigan (2025)</title>
+      <link>https://readingstori.es</link>
+      <guid>the-bear-out-there-2025</guid>
+      <pubDate>Sat, 22 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
+
+    <item>
+      <title>In the World of Whales by Michelle Cusolito &amp; Jessica Lanan (2025)</title>
+      <link>https://readingstori.es</link>
+      <guid>in-the-world-of-whales-2025</guid>
+      <pubDate>Sat, 22 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
+
+    <item>
+      <title>Tea Is Love by Adib Khorram &amp; Hanna Cha (2025)</title>
+      <link>https://readingstori.es</link>
+      <guid>tea-is-love-2025</guid>
+      <pubDate>Sat, 22 Feb 2026 00:00:00 +0000</pubDate>
+    </item>
+
+  </channel>
+</rss>
