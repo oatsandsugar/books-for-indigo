@@ -2,7 +2,9 @@
 
 Books I've read to Indigo, hosted at [readingstori.es](https://readingstori.es).
 
-This is an incomplete list. The page works fully without JavaScript — JS is optional and used only to update stats meters from live data.
+This is an incomplete list. The page works fully without JavaScript — pure HTML and CSS.
+
+**RSS feeds:** [All books](https://readingstori.es/feed.xml) · [Starred only](https://readingstori.es/starred.xml)
 
 **Conventions:**
 - ⭐ = starred favourites, `(currently reading)` = in progress.
