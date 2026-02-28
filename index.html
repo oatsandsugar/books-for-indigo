@@ -4,12 +4,15 @@
   <meta charset="utf-8">
   <meta name="color-scheme" content="dark light">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="alternate" type="application/rss+xml" title="Books for Indigo" href="feed.xml">
+  <link rel="alternate" type="application/rss+xml" title="Books for Indigo — Starred" href="starred.xml">
   <title>Books for Indigo</title>
   <style>body { font-family: monospace; } details > :not(summary) { margin-left: 1.2em; font-size: x-small; }</style>
 </head>
 <body>
   <h1>Books for Indigo</h1>
   <p>A list of books I've read to my baby. Incomplete, but trying to catch as many as I can! Favorites are starred ⭐.</p>
+  <p><small><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a> · <a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a> · Last updated: 28 Feb 2026</small></p>
 
   <h2>Picture Books</h2>
   <ul>
@@ -142,12 +145,9 @@
 
   <!-- Footer -->
   <hr>
-  <marquee>"A children's story that can only be enjoyed by children is not a good children's story in the slightest." — C.S. Lewis, <cite>On Three Ways of Writing for Children</cite> (1952)</marquee>
-
-  <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a></p>
-
-  <p>🌐 <b>Attention nerdy parents of the information superhighway!</b> We have a webring now. Got a cool site? <a href="https://github.com/oatsandsugar/90s-internet/issues/new?title=Join%20the%20webring&amp;labels=join&amp;body=My%20site%3A%20%0A%0AA%20short%20description%3A%20%0A%0AI%20added%20the%20webring%20snippet%20to%20my%20site%3A%20yes%20%2F%20not%20yet">Join the ring!</a></p>
-  <p><small>Last updated: Feb 2026</small></p>
+  <p>🌐 Got a cool site? <a href="https://github.com/oatsandsugar/90s-internet/issues/new?title=Join%20the%20webring&amp;labels=join&amp;body=My%20site%3A%20%0A%0AA%20short%20description%3A%20%0A%0AI%20added%20the%20webring%20snippet%20to%20my%20site%3A%20yes%20%2F%20not%20yet">Join the webring!</a></p>
+  <hr>
+  <small><marquee>"A children's story that can only be enjoyed by children is not a good children's story in the slightest." — C.S. Lewis, <cite>On Three Ways of Writing for Children</cite> (1952)</marquee></small>
   <p><small>© Johanan Ottensooser. <a href="https://github.com/oatsandsugar/books-for-indigo/blob/main/LICENSE">MIT License</a>.</small></p>
 
   <p><small><i>P.S. Our bedtime routine is one or two picture books, a poem from a poetry book, then we put Indi in her crib and read her chapter book till she says "night night."</i></small></p>
@@ -177,55 +177,6 @@ document.querySelectorAll('li[data-caldecott-medal]')</pre>
 
     <p>See the <a href="https://github.com/oatsandsugar/books-for-indigo#extracting-data">README</a> for more queries.</p>
 
-    <!-- Stats meters (hardcoded fallbacks, updated by JS below) -->
-    <p>Caldecott Medal collection: <meter id="caldecott" value="15" max="89" title="15/89">15/89</meter> 15/89</p>
-
-    <p>Stars per decade:</p>
-    <ul id="decade-meters">
-      <li>1900s: <meter value="0" max="0">0/0</meter> 0/0</li>
-      <li>1910s: <meter value="0" max="0">0/0</meter> 0/0</li>
-      <li>1920s: <meter value="0" max="0">0/0</meter> 0/0</li>
-      <li>1930s: <meter value="0" max="1">0/1</meter> 0/1</li>
-      <li>1940s: <meter value="0" max="1">0/1</meter> 0/1</li>
-      <li>1950s: <meter value="0" max="0">0/0</meter> 0/0</li>
-      <li>1960s: <meter value="3" max="6">3/6</meter> 3/6</li>
-      <li>1970s: <meter value="1" max="6">1/6</meter> 1/6</li>
-      <li>1980s: <meter value="5" max="9">5/9</meter> 5/9</li>
-      <li>1990s: <meter value="5" max="11">5/11</meter> 5/11</li>
-      <li>2000s: <meter value="1" max="9">1/9</meter> 1/9</li>
-      <li>2010s: <meter value="5" max="26">5/26</meter> 5/26</li>
-      <li>2020s: <meter value="5" max="46">5/46</meter> 5/46</li>
-    </ul>
   </details>
-
-  <!-- Optional JS: updates meters from live data. Page works without this. -->
-  <script>
-    // Update Caldecott meter
-    var caldecott = document.getElementById('caldecott');
-    caldecott.value = document.querySelectorAll('li[data-caldecott-medal]').length;
-
-    // Tally stars and totals per decade
-    var decades = {};
-    document.querySelectorAll('li[data-year]').forEach(function(li) {
-      var year = parseInt(li.dataset.year);
-      if (year <= 0) return;
-      var decade = Math.floor(year / 10) * 10 + 's';
-      if (!decades[decade]) decades[decade] = { total: 0, starred: 0 };
-      decades[decade].total++;
-      if (li.hasAttribute('data-starred')) decades[decade].starred++;
-    });
-
-    // Update each decade meter
-    document.querySelectorAll('#decade-meters li').forEach(function(li) {
-      var label = li.textContent.split(':')[0].trim();
-      var data = decades[label];
-      if (data) {
-        var meter = li.querySelector('meter');
-        meter.value = data.starred;
-        meter.max = data.total;
-        li.lastChild.textContent = ' ' + data.starred + '/' + data.total;
-      }
-    });
-  </script>
 </body>
 </html>
