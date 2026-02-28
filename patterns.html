@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <title>Patterns — Books for Indigo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fffff8;
+      --fg: #111;
+      --muted: #666;
+      --faint: #aaa;
+      --accent: #a0522d;
+      --link: #a00;
+      --rule: rgba(0,0,0,0.1);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg: #1a1a18;
+        --fg: #d4d0c8;
+        --muted: #908c84;
+        --faint: #5a5850;
+        --accent: #c4786e;
+        --link: #d4837b;
+        --rule: rgba(255,255,255,0.1);
+      }
+    }
+
+    body {
+      font-family: Palatino, 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      width: 87.5%;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 12.5%;
+      max-width: 1400px;
+    }
+
+    h1 { font-weight: 400; font-size: 2.2rem; margin-top: 2rem; margin-bottom: 0; line-height: 1.15; }
+    .subtitle { font-style: italic; margin-top: 0.4rem; color: var(--muted); }
+    h2 { font-weight: 400; font-size: 1.5rem; font-style: italic; margin-top: 3rem; margin-bottom: 0.8rem; }
+
+    p, dl { width: 55%; }
+    a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    a:hover { color: var(--fg); }
+
+    .nav { font-size: 0.9rem; }
+    .nav a { color: var(--muted); text-decoration: none; }
+    .nav a:hover { color: var(--fg); }
+
+    /* Margin notes — Tufte's signature element */
+    .marginnote {
+      float: right;
+      clear: right;
+      margin-right: -60%;
+      width: 50%;
+      margin-top: 0;
+      margin-bottom: 1em;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    /* Tables — no rules except a thin header underline */
+    table { border-collapse: collapse; margin: 0.5em 0 1.5em; }
+    th, td { padding: 0.25em 0.7em 0.25em 0; vertical-align: top; }
+    th {
+      font-variant: small-caps;
+      font-weight: normal;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.35em;
+      text-align: left;
+    }
+    .r { text-align: right; }
+
+    /* Sparkline-style inline bars */
+    .bar {
+      display: inline-block;
+      height: 0.5em;
+      background: var(--accent);
+      vertical-align: middle;
+      border-radius: 1px;
+    }
+
+    /* Gap markers in the Caldecott timeline */
+    .gap td {
+      color: var(--faint);
+      font-size: 0.85em;
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
+    }
+
+    /* Definition lists for repeat visitors */
+    dt { margin-top: 1.2em; }
+    dt:first-of-type { margin-top: 0; }
+    dd { margin-left: 1.5em; font-size: 0.95rem; }
+
+    .muted { color: var(--muted); }
+    .sm { font-size: 0.85em; color: var(--muted); }
+
+    .end { width: 55%; border: none; border-top: 1px solid var(--rule); margin: 3em 0 1em; }
+    .footer { font-size: 0.8rem; color: var(--muted); width: 55%; }
+    .footer a { color: var(--muted); }
+
+    @media (max-width: 900px) {
+      body { width: 90%; padding-left: 5%; }
+      p, dl, .footer { width: 100%; }
+      .marginnote {
+        float: none;
+        display: block;
+        margin: 1em 0;
+        width: 100%;
+        margin-right: 0;
+        padding-left: 1em;
+        border-left: 2px solid var(--rule);
+      }
+    }
+  </style>
+</head>
+<body>
+  <article>
+    <p class="nav"><a href="/">&larr; Books for Indigo</a></p>
+    <h1>Patterns</h1>
+    <p class="subtitle">A few things hiding in <a href="/">the data</a>.</p>
+
+    <section>
+      <h2>Survivorship Bias</h2>
+      <span class="marginnote">The 1980s are 56% starred. The 2020s, 11%. This isn't because the eighties produced better books&mdash;it's because a book from 1986 only makes it onto this list if it survived nearly four decades of cultural filtering. Every old book here has already proven itself. Every new book is still on probation.</span>
+      <table>
+        <tr><th></th><th class="r">books</th><th class="r">&starf;</th><th>rate</th></tr>
+        <tr><td>1930s</td><td class="r">1</td><td class="r">0</td><td> 0%</td></tr>
+        <tr><td>1940s</td><td class="r">1</td><td class="r">0</td><td> 0%</td></tr>
+        <tr><td>1960s</td><td class="r">6</td><td class="r">3</td><td><span class="bar" style="width: 5.0ch"></span> 50%</td></tr>
+        <tr><td>1970s</td><td class="r">6</td><td class="r">1</td><td><span class="bar" style="width: 1.7ch"></span> 17%</td></tr>
+        <tr><td>1980s</td><td class="r">9</td><td class="r">5</td><td><span class="bar" style="width: 5.6ch"></span> 56%</td></tr>
+        <tr><td>1990s</td><td class="r">11</td><td class="r">5</td><td><span class="bar" style="width: 4.5ch"></span> 45%</td></tr>
+        <tr><td>2000s</td><td class="r">9</td><td class="r">1</td><td><span class="bar" style="width: 1.1ch"></span> 11%</td></tr>
+        <tr><td>2010s</td><td class="r">26</td><td class="r">5</td><td><span class="bar" style="width: 1.9ch"></span> 19%</td></tr>
+        <tr><td>2020s</td><td class="r">46</td><td class="r">5</td><td><span class="bar" style="width: 1.1ch"></span> 11%</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>The Caldecott Shelf</h2>
+      <span class="marginnote">Six medals cluster in 13 years from 1988 to 2000&mdash;when these books' parents were children themselves. The 18-year gap before 1982 and the 14-year gap after 2000 represent decades of Caldecott winners still waiting to be discovered.</span>
+      <p>13 of the 89 Caldecott Medal winners are on this list&mdash;a shelf of 15%.</p>
+      <table>
+        <tr><td class="r">1963</td><td><cite>The Snowy Day</cite></td><td class="muted">Ezra Jack Keats</td></tr>
+        <tr><td class="r">1964</td><td><cite>Where the Wild Things Are</cite></td><td class="muted">Maurice Sendak</td></tr>
+        <tr class="gap"><td></td><td colspan="2">&mdash; 18 years &mdash;</td></tr>
+        <tr><td class="r">1982</td><td><cite>Jumanji</cite></td><td class="muted">Chris Van Allsburg</td></tr>
+        <tr class="gap"><td></td><td colspan="2">&mdash; 6 years &mdash;</td></tr>
+        <tr><td class="r">1988</td><td><cite>Owl Moon</cite></td><td class="muted">Jane Yolen &amp; John Schoenherr</td></tr>
+        <tr><td class="r">1990</td><td><cite>Lon Po Po</cite></td><td class="muted">Ed Young</td></tr>
+        <tr><td class="r">1992</td><td><cite>Tuesday</cite></td><td class="muted">David Wiesner</td></tr>
+        <tr><td class="r">1994</td><td><cite>Grandfather's Journey</cite></td><td class="muted">Allen Say</td></tr>
+        <tr><td class="r">1997</td><td><cite>Golem</cite></td><td class="muted">David Wisniewski</td></tr>
+        <tr><td class="r">2000</td><td><cite>Joseph Had a Little Overcoat</cite></td><td class="muted">Simms Taback</td></tr>
+        <tr class="gap"><td></td><td colspan="2">&mdash; 14 years &mdash;</td></tr>
+        <tr><td class="r">2014</td><td><cite>Locomotive</cite></td><td class="muted">Brian Floca</td></tr>
+        <tr><td class="r">2015</td><td><cite>The Adventures of Beekle</cite></td><td class="muted">Dan Santat</td></tr>
+        <tr class="gap"><td></td><td colspan="2">&mdash; 4 years &mdash;</td></tr>
+        <tr><td class="r">2019</td><td><cite>Hello Lighthouse</cite></td><td class="muted">Sophie Blackall</td></tr>
+        <tr class="gap"><td></td><td colspan="2">&mdash; 7 years &mdash;</td></tr>
+        <tr><td class="r">2026</td><td><cite>Fireworks</cite></td><td class="muted">Matthew Burgess &amp; C&aacute;tia Chien</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>The Australian Shelf</h2>
+      <span class="marginnote">50% of the Australian books are starred, against 19% for the rest. Four of the five starred Australian titles cluster in the late 1980s and early 1990s&mdash;the books a child in Australia would have grown up with. The list-maker's childhood is showing.</span>
+      <p>10 of 117 books are by Australian creators&mdash;8% of the list, but 20% of the stars.</p>
+      <table>
+        <tr><td class="r">1983</td><td></td><td><cite>How the Birds Got Their Colours</cite></td><td class="muted">Mary Albert &amp; Pamela Lofts</td></tr>
+        <tr><td class="r">1986</td><td>&starf;</td><td><cite>Animalia</cite></td><td class="muted">Graeme Base</td></tr>
+        <tr><td class="r">1989</td><td>&starf;</td><td><cite>The Eleventh Hour</cite></td><td class="muted">Graeme Base</td></tr>
+        <tr><td class="r">1990</td><td>&starf;</td><td><cite>Magic Beach</cite></td><td class="muted">Alison Lester</td></tr>
+        <tr><td class="r">1991</td><td>&starf;</td><td><cite>Window</cite></td><td class="muted">Jeannie Baker</td></tr>
+        <tr><td class="r">1995</td><td></td><td><cite>Warnayarra the Rainbow Snake</cite></td><td class="muted">Lajamanu School &amp; Pamela Lofts</td></tr>
+        <tr><td class="r">2001</td><td></td><td><cite>The Water Hole</cite></td><td class="muted">Graeme Base</td></tr>
+        <tr><td class="r">2011</td><td>&starf;</td><td><cite>Rudie Nudie</cite></td><td class="muted">Emma Quay</td></tr>
+        <tr><td class="r">2013</td><td></td><td><cite>Rules of Summer</cite></td><td class="muted">Shaun Tan</td></tr>
+        <tr><td class="r">2021</td><td></td><td><cite>The Boy and the Elephant</cite></td><td class="muted">Freya Blackwood</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>The Repeat Visitors</h2>
+      <span class="marginnote">Carson Ellis appears three times&mdash;once as author and twice as illustrator, bridging Susan Cooper and Mac Barnett into this collection. Kyo Maclear and Gracey Zhang are the only author&ndash;illustrator duo to collaborate twice. Illustrators are the connective tissue of children's literature.</span>
+      <p>Creators who show up more than once.</p>
+      <dl>
+        <dt><b>Mo Willems</b> &middot; 4 books</dt>
+        <dd><cite>Don't Let the Pigeon Drive the Bus!</cite> (2003)</dd>
+        <dd><cite>Watch Me Throw the Ball!</cite> (2009)</dd>
+        <dd><cite>We Are in a Book!</cite> (2010)</dd>
+        <dd><cite>Sam the Most Scaredy-Cat Kid in the Whole World</cite> (2017)</dd>
+
+        <dt><b>Graeme Base</b> &middot; 3 books</dt>
+        <dd>&starf; <cite>Animalia</cite> (1986)</dd>
+        <dd>&starf; <cite>The Eleventh Hour</cite> (1989)</dd>
+        <dd><cite>The Water Hole</cite> (2001)</dd>
+
+        <dt><b>Carson Ellis</b> &middot; 3 books <span class="sm">&mdash; 2 as illustrator</span></dt>
+        <dd>&starf; <cite>Du Iz Tak?</cite> (2016)</dd>
+        <dd>&starf; <cite>The Shortest Day</cite> (2019) <span class="sm">&mdash; illustrating for Susan Cooper</span></dd>
+        <dd><cite>What Is Love?</cite> (2021) <span class="sm">&mdash; illustrating for Mac Barnett</span></dd>
+
+        <dt><b>Chris Van Allsburg</b> &middot; 2 books</dt>
+        <dd><cite>The Garden of Abdul Gasazi</cite> (1979)</dd>
+        <dd><cite>Jumanji</cite> (1981)</dd>
+
+        <dt><b>Paul Fleischman</b> &middot; 2 books</dt>
+        <dd><cite>Joyful Noise</cite> (1988)</dd>
+        <dd><cite>Seedfolks</cite> (1997)</dd>
+
+        <dt><b>Tatsuya Miyanishi</b> &middot; 2 books</dt>
+        <dd><cite>You Look Yummy!</cite> (2003)</dd>
+        <dd><cite>I Will Love You Forever</cite> (2006)</dd>
+
+        <dt><b>Dan Santat</b> &middot; 2 books</dt>
+        <dd><cite>The Adventures of Beekle</cite> (2014)</dd>
+        <dd>&starf; <cite>Don't Trust Fish</cite> (2025) <span class="sm">&mdash; illustrating for Neil Sharpson</span></dd>
+
+        <dt><b>Adam Rex</b> &middot; 2 books</dt>
+        <dd><cite>XO, Ox</cite> (2017)</dd>
+        <dd>&starf; <cite>Unstoppable</cite> (2020)</dd>
+
+        <dt><b>Pamela Lofts</b> &middot; 2 books <span class="sm">&mdash; as illustrator &amp; compiler</span></dt>
+        <dd><cite>How the Birds Got Their Colours</cite> (1983) <span class="sm">&mdash; illustrating for Mary Albert</span></dd>
+        <dd><cite>Warnayarra the Rainbow Snake</cite> (1995) <span class="sm">&mdash; compiler</span></dd>
+
+        <dt><b>Kyo Maclear</b> &middot; 2 books</dt>
+        <dd><cite>The Big Bath House</cite> (2021)</dd>
+        <dd><cite>Noodles on a Bicycle</cite> (2024)</dd>
+
+        <dt><b>Gracey Zhang</b> &middot; 2 books <span class="sm">&mdash; as illustrator</span></dt>
+        <dd><cite>The Big Bath House</cite> (2021) <span class="sm">&mdash; illustrating for Kyo Maclear</span></dd>
+        <dd><cite>Noodles on a Bicycle</cite> (2024) <span class="sm">&mdash; illustrating for Kyo Maclear</span></dd>
+      </dl>
+    </section>
+
+    <hr class="end">
+    <p class="footer"><a href="/">&larr; Back to the list</a></p>
+    <p class="footer">&copy; Johanan Ottensooser. <a href="https://github.com/oatsandsugar/books-for-indigo/blob/main/LICENSE">MIT License</a>.</p>
+  </article>
+</body>
+</html>
