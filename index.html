@@ -11,6 +11,27 @@
   <h1>Books for Indigo</h1>
   <p>A list of books I've read to my baby. Incomplete, but trying to catch as many as I can! Favorites are starred ⭐.</p>
 
+  <fieldset>
+    <legend>Filter</legend>
+    <input type="button" value="Show All" onclick="showAll()">
+    <input type="button" value="⭐ Favorites" onclick="filterStarred(this)">
+    <input type="button" value="📖 Reading" onclick="filterReading(this)">
+    <input type="button" value="🏅 Awards" onclick="filterAwards(this)">
+    &nbsp;Decade:
+    <select id="decade-select" onchange="filterDecade(this)">
+      <option value="">—</option>
+      <option value="1930">1930s</option>
+      <option value="1940">1940s</option>
+      <option value="1960">1960s</option>
+      <option value="1970">1970s</option>
+      <option value="1980">1980s</option>
+      <option value="1990">1990s</option>
+      <option value="2000">2000s</option>
+      <option value="2010">2010s</option>
+      <option value="2020">2020s</option>
+    </select>
+  </fieldset>
+
   <h2>Picture Books</h2>
   <ul>
     <li data-year="1962" data-starred data-status="read" data-caldecott-medal="1963">⭐ <cite title="Caldecott Medal 1963">The Snowy Day</cite> by <span class="author">Ezra Jack Keats</span> (1962)</li>
@@ -197,6 +218,92 @@ document.querySelectorAll('li[data-caldecott-medal]')</pre>
       <li>2020s: <meter value="5" max="46">5/46</meter> 5/46</li>
     </ul>
   </details>
+
+  <!-- Optional JS: filter buttons (1990s JS — getElementsByTagName, getAttribute, for loops) -->
+  <script>
+    var activeBtn = null;
+
+    function setActive(btn) {
+      if (activeBtn) activeBtn.style.fontWeight = '';
+      if (btn) btn.style.fontWeight = 'bold';
+      activeBtn = btn;
+    }
+
+    function forEachBook(fn) {
+      var items = document.getElementsByTagName('LI');
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].getAttribute('data-year') != null) fn(items[i]);
+      }
+    }
+
+    function updateSections() {
+      var headings = document.getElementsByTagName('H2');
+      for (var i = 0; i < headings.length; i++) {
+        var el = headings[i].nextSibling;
+        while (el && el.nodeType != 1) el = el.nextSibling;
+        if (!el || el.tagName != 'UL') continue;
+        var visible = false;
+        var lis = el.getElementsByTagName('LI');
+        for (var j = 0; j < lis.length; j++) {
+          if (lis[j].style.display != 'none') { visible = true; break; }
+        }
+        headings[i].style.display = visible ? '' : 'none';
+        el.style.display = visible ? '' : 'none';
+      }
+    }
+
+    function showAll() {
+      forEachBook(function(li) { li.style.display = ''; });
+      var headings = document.getElementsByTagName('H2');
+      for (var i = 0; i < headings.length; i++) headings[i].style.display = '';
+      var uls = document.getElementsByTagName('UL');
+      for (var i = 0; i < uls.length; i++) uls[i].style.display = '';
+      setActive(null);
+      document.getElementById('decade-select').selectedIndex = 0;
+    }
+
+    function applyFilter(btn, testFn) {
+      if (btn && activeBtn == btn) { showAll(); return; }
+      forEachBook(function(li) {
+        li.style.display = testFn(li) ? '' : 'none';
+      });
+      updateSections();
+      setActive(btn);
+      document.getElementById('decade-select').selectedIndex = 0;
+    }
+
+    function filterStarred(btn) {
+      applyFilter(btn, function(li) {
+        return li.getAttribute('data-starred') != null;
+      });
+    }
+
+    function filterReading(btn) {
+      applyFilter(btn, function(li) {
+        return li.getAttribute('data-status') == 'reading';
+      });
+    }
+
+    function filterAwards(btn) {
+      applyFilter(btn, function(li) {
+        return li.getAttribute('data-caldecott-medal') != null
+            || li.getAttribute('data-caldecott-honor') != null
+            || li.getAttribute('data-nyt-illustrated') != null;
+      });
+    }
+
+    function filterDecade(sel) {
+      var val = sel.options[sel.selectedIndex].value;
+      if (val == '') { showAll(); return; }
+      var start = parseInt(val);
+      forEachBook(function(li) {
+        var year = parseInt(li.getAttribute('data-year'));
+        li.style.display = (year >= start && year < start + 10) ? '' : 'none';
+      });
+      updateSections();
+      setActive(null);
+    }
+  </script>
 
   <!-- Optional JS: updates meters from live data. Page works without this. -->
   <script>
