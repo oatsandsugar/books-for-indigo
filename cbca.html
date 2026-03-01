@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Tracking progress through CBCA Picture Book of the Year winners (1956–2025). A visual checklist for Books for Indigo.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏅</text></svg>">
+  <title>CBCA Picture Book Checklist — Books for Indigo</title>
+  <style>
+    body { font-family: monospace; max-width: 80ch; margin: 2em auto; padding: 0 1em; }
+    .grid {
+      display: inline-grid;
+      grid-template-columns: 1.5em repeat(8, 1.8em);
+      gap: 0.25em;
+      align-items: center;
+      justify-items: center;
+      margin: 1em 0;
+    }
+    .grid .label { font-size: 0.7em; color: gray; }
+    .grid .cell {
+      width: 1.2em;
+      height: 1.2em;
+      border-radius: 0.2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .unread { background: #444; }
+    .read { background: #2ea043; }
+    .starred { background: #2ea043; color: white; font-size: 0.9em; }
+    .empty { }
+    @media (prefers-color-scheme: light) {
+      .unread { background: #ddd; }
+    }
+    .legend { margin: 1em 0; font-size: small; }
+    .legend .swatch {
+      display: inline-block;
+      width: 0.9em;
+      height: 0.9em;
+      border-radius: 0.15em;
+      vertical-align: middle;
+      margin-right: 0.2em;
+    }
+    .list-read cite { font-weight: bold; }
+    .list-unread { opacity: 0.5; }
+    h3 { margin-top: 1.5em; margin-bottom: 0.5em; }
+  </style>
+</head>
+<body>
+  <h1>CBCA Picture Book Checklist</h1>
+  <p><a href="index.html">&larr; Books for Indigo</a></p>
+  <p>The <a href="https://cbca.org.au/">CBCA Picture Book of the Year</a> has been awarded by the Children's Book Council of Australia since 1956. 56 books have won across 54 award years.</p>
+  <p id="progress"><strong>Loading...</strong></p>
+  <noscript><p><small><em>JavaScript is needed to show read/starred status from the <a href="index.html">book list</a>.</em></small></p></noscript>
+
+  <div class="grid">
+    <!-- Header row -->
+    <span></span>
+    <span class="label">50s</span>
+    <span class="label">60s</span>
+    <span class="label">70s</span>
+    <span class="label">80s</span>
+    <span class="label">90s</span>
+    <span class="label">00s</span>
+    <span class="label">10s</span>
+    <span class="label">20s</span>
+
+    <!-- Row 0 -->
+    <span class="label">0</span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1980" title="1980 · One Dragon's Dream · Peter Pavey"></span>
+    <span class="cell unread" data-year="1990" title="1990 · The Very Best of Friends · Margaret Wild &amp; Julie Vivas"></span>
+    <span class="cell unread" data-year="2000" title="2000 · Jenny Angel · Margaret Wild &amp; Anne Spudvilas"></span>
+    <span class="cell unread" data-year="2010" title="2010 · The Hero of Little Street · Gregory Rogers"></span>
+    <span class="cell unread" data-year="2020" title="2020 · I Need a Parrot · Chris McKimmie"></span>
+
+    <!-- Row 1 -->
+    <span class="label">1</span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1971" title="1971 · Waltzing Matilda · Desmond Digby"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1991" title="1991 · Greetings from Sandy Beach · Bob Graham"></span>
+    <span class="cell unread" data-year="2001" title="2001 · Fox · Margaret Wild &amp; Ron Brooks"></span>
+    <span class="cell unread" data-year="2011" title="2011 · Mirror (Jeannie Baker) + Hamlet (Nicki Greenberg)"></span>
+    <span class="cell unread" data-year="2021" title="2021 · How to Make a Bird · Meg McKinlay &amp; Matt Ottley"></span>
+
+    <!-- Row 2 -->
+    <span class="label">2</span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1982" title="1982 · Sunshine · Jan Ormerod"></span>
+    <span class="cell unread" data-year="1992" title="1992 · Window · Jeannie Baker"></span>
+    <span class="cell unread" data-year="2002" title="2002 · An Ordinary Day · Libby Gleeson &amp; Armin Greder"></span>
+    <span class="cell unread" data-year="2012" title="2012 · A Bus Called Heaven · Bob Graham"></span>
+    <span class="cell unread" data-year="2022" title="2022 · Iceberg · Claire Saxby &amp; Jess Racklyeft"></span>
+
+    <!-- Row 3 -->
+    <span class="label">3</span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1983" title="1983 · Who Sank the Boat? · Pamela Allen"></span>
+    <span class="cell unread" data-year="1993" title="1993 · Rose Meets Mr Wintergarten · Bob Graham"></span>
+    <span class="cell unread" data-year="2003" title="2003 · In Flanders Fields · Norman Jorgensen &amp; Brian Harrison-Lever"></span>
+    <span class="cell unread" data-year="2013" title="2013 · The Coat · Julie Hunt &amp; Ron Brooks"></span>
+    <span class="cell unread" data-year="2023" title="2023 · My Strange Shrinking Parents · Zeno Sworder"></span>
+
+    <!-- Row 4 -->
+    <span class="label">4</span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1974" title="1974 · The Bunyip of Berkeley's Creek · Jenny Wagner &amp; Ron Brooks"></span>
+    <span class="cell unread" data-year="1984" title="1984 · Bertie and the Bear · Pamela Allen"></span>
+    <span class="cell unread" data-year="1994" title="1994 · First Light · Gary Crew &amp; Peter Gouldthorpe"></span>
+    <span class="cell unread" data-year="2004" title="2004 · Cat and Fish · Joan Grant &amp; Neil Curtis"></span>
+    <span class="cell unread" data-year="2014" title="2014 · Rules of Summer · Shaun Tan"></span>
+    <span class="cell unread" data-year="2024" title="2024 · Timeless · Kelly Canby"></span>
+
+    <!-- Row 5 -->
+    <span class="label">5</span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1965" title="1965 · Hugh's Zoo · Elisabeth MacIntyre"></span>
+    <span class="cell unread" data-year="1975" title="1975 · The Man from Ironbark · Quentin Hole"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1995" title="1995 · The Watertower · Gary Crew &amp; Stephen Woolman"></span>
+    <span class="cell unread" data-year="2005" title="2005 · Are We There Yet? · Alison Lester"></span>
+    <span class="cell unread" data-year="2015" title="2015 · My Two Blankets · Irena Kobald &amp; Freya Blackwood"></span>
+    <span class="cell unread" data-year="2025" title="2025 · The Truck Cat · Deborah Frenkel &amp; Danny Snell"></span>
+
+    <!-- Row 6 -->
+    <span class="label">6</span>
+    <span class="cell unread" data-year="1956" title="1956 · Wish and the Magic Nut · Peggy Barnard &amp; Sheila Hawkins"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1976" title="1976 · The Rainbow Serpent · Dick Roughsey"></span>
+    <span class="cell unread" data-year="1986" title="1986 · Felix &amp; Alexander · Terry Denton"></span>
+    <span class="cell unread" data-year="1996" title="1996 · The Hunt · Narelle Oliver"></span>
+    <span class="cell unread" data-year="2006" title="2006 · The Short and Incredibly Happy Life of Riley · Colin Thompson"></span>
+    <span class="cell unread" data-year="2016" title="2016 · Flight · Nadia Wheatley &amp; Armin Greder"></span>
+    <span class="cell empty"></span>
+
+    <!-- Row 7 -->
+    <span class="label">7</span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1987" title="1987 · Kojuro and the Bears · Junko Morimoto"></span>
+    <span class="cell unread" data-year="1997" title="1997 · Not a Nibble! · Elizabeth Honey"></span>
+    <span class="cell unread" data-year="2007" title="2007 · The Arrival · Shaun Tan"></span>
+    <span class="cell unread" data-year="2017" title="2017 · Home in the Rain · Bob Graham"></span>
+    <span class="cell empty"></span>
+
+    <!-- Row 8 -->
+    <span class="label">8</span>
+    <span class="cell unread" data-year="1958" title="1958 · Piccaninny Walkabout · Axel Poignant"></span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1978" title="1978 · John Brown, Rose and the Midnight Cat · Jenny Wagner &amp; Ron Brooks"></span>
+    <span class="cell unread" data-year="1988" title="1988 · Crusher is Coming! · Bob Graham"></span>
+    <span class="cell unread" data-year="1998" title="1998 · The Two Bullies · Junko Morimoto"></span>
+    <span class="cell unread" data-year="2008" title="2008 · Requiem for a Beast · Matt Ottley"></span>
+    <span class="cell unread" data-year="2018" title="2018 · A Walk in the Bush · Gwyn Perkins"></span>
+    <span class="cell empty"></span>
+
+    <!-- Row 9 -->
+    <span class="label">9</span>
+    <span class="cell empty"></span>
+    <span class="cell unread" data-year="1969" title="1969 · Sly Old Wardrobe · Ted Greenwood"></span>
+    <span class="cell unread" data-year="1979" title="1979 · The Quinkins · Percy Trezise &amp; Dick Roughsey"></span>
+    <span class="cell unread" data-year="1989" title="1989 · The Eleventh Hour (Graeme Base); Drac and the Gremlin (Jane Tanner)"></span>
+    <span class="cell unread" data-year="1999" title="1999 · The Rabbits · John Marsden &amp; Shaun Tan"></span>
+    <span class="cell unread" data-year="2009" title="2009 · Collecting Colour · Kylie Dunstan"></span>
+    <span class="cell unread" data-year="2019" title="2019 · Cicada · Shaun Tan"></span>
+    <span class="cell empty"></span>
+  </div>
+
+  <p class="legend">
+    ★ read + starred &nbsp;
+    <span class="swatch read"></span> read &nbsp;
+    <span class="swatch unread"></span> unread
+  </p>
+
+  <h2>All 56 Winners</h2>
+
+  <h3>1950s</h3>
+  <ul>
+    <li class="list-unread" data-year="1956"><span class="cb">☐</span> <cite>Wish and the Magic Nut</cite> (1956) — Peggy Barnard &amp; Sheila Hawkins<span class="star"></span></li>
+    <li class="list-unread" data-year="1958"><span class="cb">☐</span> <cite>Piccaninny Walkabout</cite> (1958) — Axel Poignant<span class="star"></span></li>
+  </ul>
+
+  <h3>1960s</h3>
+  <ul>
+    <li class="list-unread" data-year="1965"><span class="cb">☐</span> <cite>Hugh's Zoo</cite> (1965) — Elisabeth MacIntyre<span class="star"></span></li>
+    <li class="list-unread" data-year="1969"><span class="cb">☐</span> <cite>Sly Old Wardrobe</cite> (1969) — Ivan Southall &amp; Ted Greenwood<span class="star"></span></li>
+  </ul>
+
+  <h3>1970s</h3>
+  <ul>
+    <li class="list-unread" data-year="1971"><span class="cb">☐</span> <cite>Waltzing Matilda</cite> (1971) — A. B. Paterson &amp; Desmond Digby<span class="star"></span></li>
+    <li class="list-unread" data-year="1974"><span class="cb">☐</span> <cite>The Bunyip of Berkeley's Creek</cite> (1974) — Jenny Wagner &amp; Ron Brooks<span class="star"></span></li>
+    <li class="list-unread" data-year="1975"><span class="cb">☐</span> <cite>The Man from Ironbark</cite> (1975) — A. B. Paterson &amp; Quentin Hole<span class="star"></span></li>
+    <li class="list-unread" data-year="1976"><span class="cb">☐</span> <cite>The Rainbow Serpent</cite> (1976) — Dick Roughsey<span class="star"></span></li>
+    <li class="list-unread" data-year="1978"><span class="cb">☐</span> <cite>John Brown, Rose and the Midnight Cat</cite> (1978) — Jenny Wagner &amp; Ron Brooks<span class="star"></span></li>
+    <li class="list-unread" data-year="1979"><span class="cb">☐</span> <cite>The Quinkins</cite> (1979) — Percy Trezise &amp; Dick Roughsey<span class="star"></span></li>
+  </ul>
+
+  <h3>1980s</h3>
+  <ul>
+    <li class="list-unread" data-year="1980"><span class="cb">☐</span> <cite>One Dragon's Dream</cite> (1980) — Peter Pavey<span class="star"></span></li>
+    <li class="list-unread" data-year="1982"><span class="cb">☐</span> <cite>Sunshine</cite> (1982) — Jan Ormerod<span class="star"></span></li>
+    <li class="list-unread" data-year="1983"><span class="cb">☐</span> <cite>Who Sank the Boat?</cite> (1983) — Pamela Allen<span class="star"></span></li>
+    <li class="list-unread" data-year="1984"><span class="cb">☐</span> <cite>Bertie and the Bear</cite> (1984) — Pamela Allen<span class="star"></span></li>
+    <li class="list-unread" data-year="1986"><span class="cb">☐</span> <cite>Felix &amp; Alexander</cite> (1986) — Terry Denton<span class="star"></span></li>
+    <li class="list-unread" data-year="1987"><span class="cb">☐</span> <cite>Kojuro and the Bears</cite> (1987) — Junko Morimoto<span class="star"></span></li>
+    <li class="list-unread" data-year="1988"><span class="cb">☐</span> <cite>Crusher is Coming!</cite> (1988) — Bob Graham<span class="star"></span></li>
+    <li class="list-unread" data-year="1989"><span class="cb">☐</span> <cite>The Eleventh Hour</cite> (1989) — Graeme Base<span class="star"></span></li>
+    <li class="list-unread" data-year="1989"><span class="cb">☐</span> <cite>Drac and the Gremlin</cite> (1989) — Allan Baillie &amp; Jane Tanner<span class="star"></span></li>
+  </ul>
+
+  <h3>1990s</h3>
+  <ul>
+    <li class="list-unread" data-year="1990"><span class="cb">☐</span> <cite>The Very Best of Friends</cite> (1990) — Margaret Wild &amp; Julie Vivas<span class="star"></span></li>
+    <li class="list-unread" data-year="1991"><span class="cb">☐</span> <cite>Greetings from Sandy Beach</cite> (1991) — Bob Graham<span class="star"></span></li>
+    <li class="list-unread" data-year="1992"><span class="cb">☐</span> <cite>Window</cite> (1992) — Jeannie Baker<span class="star"></span></li>
+    <li class="list-unread" data-year="1993"><span class="cb">☐</span> <cite>Rose Meets Mr Wintergarten</cite> (1993) — Bob Graham<span class="star"></span></li>
+    <li class="list-unread" data-year="1994"><span class="cb">☐</span> <cite>First Light</cite> (1994) — Gary Crew &amp; Peter Gouldthorpe<span class="star"></span></li>
+    <li class="list-unread" data-year="1995"><span class="cb">☐</span> <cite>The Watertower</cite> (1995) — Gary Crew &amp; Stephen Woolman<span class="star"></span></li>
+    <li class="list-unread" data-year="1996"><span class="cb">☐</span> <cite>The Hunt</cite> (1996) — Narelle Oliver<span class="star"></span></li>
+    <li class="list-unread" data-year="1997"><span class="cb">☐</span> <cite>Not a Nibble!</cite> (1997) — Elizabeth Honey<span class="star"></span></li>
+    <li class="list-unread" data-year="1998"><span class="cb">☐</span> <cite>The Two Bullies</cite> (1998) — Junko Morimoto<span class="star"></span></li>
+    <li class="list-unread" data-year="1999"><span class="cb">☐</span> <cite>The Rabbits</cite> (1999) — John Marsden &amp; Shaun Tan<span class="star"></span></li>
+  </ul>
+
+  <h3>2000s</h3>
+  <ul>
+    <li class="list-unread" data-year="2000"><span class="cb">☐</span> <cite>Jenny Angel</cite> (2000) — Margaret Wild &amp; Anne Spudvilas<span class="star"></span></li>
+    <li class="list-unread" data-year="2001"><span class="cb">☐</span> <cite>Fox</cite> (2001) — Margaret Wild &amp; Ron Brooks<span class="star"></span></li>
+    <li class="list-unread" data-year="2002"><span class="cb">☐</span> <cite>An Ordinary Day</cite> (2002) — Libby Gleeson &amp; Armin Greder<span class="star"></span></li>
+    <li class="list-unread" data-year="2003"><span class="cb">☐</span> <cite>In Flanders Fields</cite> (2003) — Norman Jorgensen &amp; Brian Harrison-Lever<span class="star"></span></li>
+    <li class="list-unread" data-year="2004"><span class="cb">☐</span> <cite>Cat and Fish</cite> (2004) — Joan Grant &amp; Neil Curtis<span class="star"></span></li>
+    <li class="list-unread" data-year="2005"><span class="cb">☐</span> <cite>Are We There Yet?</cite> (2005) — Alison Lester<span class="star"></span></li>
+    <li class="list-unread" data-year="2006"><span class="cb">☐</span> <cite>The Short and Incredibly Happy Life of Riley</cite> (2006) — Colin Thompson<span class="star"></span></li>
+    <li class="list-unread" data-year="2007"><span class="cb">☐</span> <cite>The Arrival</cite> (2007) — Shaun Tan<span class="star"></span></li>
+    <li class="list-unread" data-year="2008"><span class="cb">☐</span> <cite>Requiem for a Beast</cite> (2008) — Matt Ottley<span class="star"></span></li>
+    <li class="list-unread" data-year="2009"><span class="cb">☐</span> <cite>Collecting Colour</cite> (2009) — Kylie Dunstan<span class="star"></span></li>
+  </ul>
+
+  <h3>2010s</h3>
+  <ul>
+    <li class="list-unread" data-year="2010"><span class="cb">☐</span> <cite>The Hero of Little Street</cite> (2010) — Gregory Rogers<span class="star"></span></li>
+    <li class="list-unread" data-year="2011"><span class="cb">☐</span> <cite>Mirror</cite> (2011) — Jeannie Baker<span class="star"></span></li>
+    <li class="list-unread" data-year="2011"><span class="cb">☐</span> <cite>Hamlet</cite> (2011) — Nicki Greenberg<span class="star"></span></li>
+    <li class="list-unread" data-year="2012"><span class="cb">☐</span> <cite>A Bus Called Heaven</cite> (2012) — Bob Graham<span class="star"></span></li>
+    <li class="list-unread" data-year="2013"><span class="cb">☐</span> <cite>The Coat</cite> (2013) — Julie Hunt &amp; Ron Brooks<span class="star"></span></li>
+    <li class="list-unread" data-year="2014"><span class="cb">☐</span> <cite>Rules of Summer</cite> (2014) — Shaun Tan<span class="star"></span></li>
+    <li class="list-unread" data-year="2015"><span class="cb">☐</span> <cite>My Two Blankets</cite> (2015) — Irena Kobald &amp; Freya Blackwood<span class="star"></span></li>
+    <li class="list-unread" data-year="2016"><span class="cb">☐</span> <cite>Flight</cite> (2016) — Nadia Wheatley &amp; Armin Greder<span class="star"></span></li>
+    <li class="list-unread" data-year="2017"><span class="cb">☐</span> <cite>Home in the Rain</cite> (2017) — Bob Graham<span class="star"></span></li>
+    <li class="list-unread" data-year="2018"><span class="cb">☐</span> <cite>A Walk in the Bush</cite> (2018) — Gwyn Perkins<span class="star"></span></li>
+    <li class="list-unread" data-year="2019"><span class="cb">☐</span> <cite>Cicada</cite> (2019) — Shaun Tan<span class="star"></span></li>
+  </ul>
+
+  <h3>2020s</h3>
+  <ul>
+    <li class="list-unread" data-year="2020"><span class="cb">☐</span> <cite>I Need a Parrot</cite> (2020) — Chris McKimmie<span class="star"></span></li>
+    <li class="list-unread" data-year="2021"><span class="cb">☐</span> <cite>How to Make a Bird</cite> (2021) — Meg McKinlay &amp; Matt Ottley<span class="star"></span></li>
+    <li class="list-unread" data-year="2022"><span class="cb">☐</span> <cite>Iceberg</cite> (2022) — Claire Saxby &amp; Jess Racklyeft<span class="star"></span></li>
+    <li class="list-unread" data-year="2023"><span class="cb">☐</span> <cite>My Strange Shrinking Parents</cite> (2023) — Zeno Sworder<span class="star"></span></li>
+    <li class="list-unread" data-year="2024"><span class="cb">☐</span> <cite>Timeless</cite> (2024) — Kelly Canby<span class="star"></span></li>
+    <li class="list-unread" data-year="2025"><span class="cb">☐</span> <cite>The Truck Cat</cite> (2025) — Deborah Frenkel &amp; Danny Snell<span class="star"></span></li>
+  </ul>
+
+  <hr>
+  <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+
+  <script>
+    fetch('index.html')
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var read = {};
+        doc.querySelectorAll('[data-cbca-picture-book]').forEach(function(el) {
+          read[el.getAttribute('data-cbca-picture-book')] = el.hasAttribute('data-starred');
+        });
+
+        var count = 0;
+        var total = document.querySelectorAll('li[data-year]').length;
+
+        document.querySelectorAll('.cell[data-year]').forEach(function(cell) {
+          var y = cell.dataset.year;
+          if (y in read) {
+            cell.classList.remove('unread');
+            if (read[y]) {
+              cell.classList.add('starred');
+              cell.textContent = '\u2605';
+            } else {
+              cell.classList.add('read');
+            }
+          }
+        });
+
+        document.querySelectorAll('li[data-year]').forEach(function(li) {
+          var y = li.dataset.year;
+          if (y in read) {
+            count++;
+            li.classList.remove('list-unread');
+            li.classList.add('list-read');
+            li.querySelector('.cb').textContent = '\u2611';
+            if (read[y]) {
+              li.querySelector('.star').textContent = ' \u2B50';
+            }
+          }
+        });
+
+        var pct = Math.round(count / total * 100);
+        var filled = Math.round(count / total * 20);
+        var bar = '\u2588'.repeat(filled) + '\u2591'.repeat(20 - filled);
+        document.getElementById('progress').innerHTML =
+          '<strong>' + count + ' / ' + total + ' read</strong> &nbsp; ' + bar + ' &nbsp; ' + pct + '%';
+      });
+  </script>
+</body>
+</html>
