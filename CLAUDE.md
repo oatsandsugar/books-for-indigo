@@ -8,9 +8,12 @@ Repo: github.com/oatsandsugar/books-for-indigo
 ## Files
 
 - `index.html` — the book list. Bare HTML, minimal CSS (monospace font, dark mode), no JS. Old-internet aesthetic.
-- `patterns.html` — Tufte-style data analytics page. Serif font, off-white, margin notes. Static HTML, no JS.
+- `caldecott.html` — Caldecott Medal checklist page.
+- `cbca.html` — CBCA (Children's Book Council of Australia) checklist page.
+- `greenaway.html` — Kate Greenaway Medal checklist page.
 - `feed.xml` — RSS feed of all recently added books. Updated manually when books are added.
 - `starred.xml` — RSS feed of starred (⭐) books only. Updated manually when starred books are added.
+- `sitemap.xml` — Human-readable sitemap.
 - `README.md` — project meta, conventions, querySelectorAll extraction docs, formerly featured quotes.
 - `CNAME` — custom domain (`readingstori.es`).
 - `LICENSE` — MIT License.
@@ -60,4 +63,4 @@ Currently-reading books are marked with `(currently reading)` prefix text.
 
 - Filter/highlight buttons in the UI (starred, by decade, currently reading, etc.)
 - Favorite libraries section
-- More awards (Newbery, Kate Greenaway, etc.)
+- More awards (Newbery, etc.) — Greenaway and CBCA checklists already added
