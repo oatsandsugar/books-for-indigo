@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Venn diagrams of awards and starred favourites from Books for Indigo.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <title>Correlations — Books for Indigo</title>
+  <style>
+    body { font-family: monospace; max-width: 90ch; margin: 2em auto; padding: 0 1em; }
+    #histogram { overflow-x: auto; margin: 1em 0 0; }
+    #histogram svg { display: block; }
+    #hist-stats { font-size: 0.8em; opacity: 0.85; margin-top: -0.5em; display: flex; flex-direction: column; align-items: center; }
+    #hist-stats table { border-spacing: 0.8em 0.1em; }
+    #hist-stats td:first-child { text-align: right; opacity: 0.7; }
+    #hist-stats td:nth-child(2) { font-weight: bold; text-align: left; }
+    #hist-stats td:nth-child(3) { text-align: left; }
+    .hist-square { transition: opacity 0.15s; }
+    .hist-square:hover { opacity: 0.7; }
+    .venns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; }
+    @media (max-width: 600px) { .venns { grid-template-columns: 1fr; } }
+    .venn-card {
+      padding: 0.8em;
+    }
+    .venn-card h3 { margin: 0 0 0.3em; font-size: 0.9em; text-align: center; }
+    .venn-card svg { display: block; margin: 0 auto; }
+    .venn-counts { display: flex; justify-content: center; gap: 1em; font-size: 0.8em; margin-top: 0.3em; }
+    .venn-counts span { opacity: 0.85; }
+    .venn-stats { font-size: 0.7em; opacity: 0.6; margin-top: 0.4em; border-top: 1px solid #444; padding-top: 0.3em; }
+    .venn-stats table { margin: 0 auto; border-spacing: 0.6em 0.1em; }
+    .venn-stats td:first-child { text-align: right; opacity: 0.7; }
+    .venn-stats td:last-child { text-align: left; font-weight: bold; }
+    .region { cursor: pointer; transition: opacity 0.15s; }
+    .region:hover { opacity: 0.8; }
+    #book-list { margin-top: 1em; min-height: 2em; }
+    #book-list h3 { margin: 0 0 0.5em; }
+    #book-list ul { margin: 0; padding-left: 1.5em; columns: 2; }
+    @media (max-width: 600px) { #book-list ul { columns: 1; } }
+    #book-list li { margin: 0.2em 0; break-inside: avoid; }
+    .legend { display: flex; gap: 1.2em; flex-wrap: wrap; justify-content: center; margin: 0.8em 0; font-size: small; }
+    .legend span { display: flex; align-items: center; gap: 0.3em; }
+    .legend .dot { width: 0.8em; height: 0.8em; border-radius: 50%; display: inline-block; }
+  </style>
+</head>
+<body>
+  <h1>Correlations</h1>
+  <p><a href="index.html">&larr; Books for Indigo</a></p>
+  <h2>Year &cap; Stars</h2>
+  <div id="histogram"></div>
+
+  <div id="hist-stats"></div>
+
+  <h2>Awards &cap; Stars</h2>
+  <p>Circle areas and overlaps are proportional to book counts.</p>
+
+  <div class="legend">
+    <span><span class="dot" style="background:#d4a017;opacity:0.7"></span> Starred</span>
+    <span><span class="dot" style="background:#4a90d9;opacity:0.7"></span> Caldecott</span>
+    <span><span class="dot" style="background:#e05555;opacity:0.7"></span> NYT Best Illustrated</span>
+    <span><span class="dot" style="background:#50a060;opacity:0.7"></span> CBCA Picture Book</span>
+    <span><span class="dot" style="background:#b065c0;opacity:0.7"></span> Community Recommended</span>
+  </div>
+
+  <div class="venns" id="venns"></div>
+  <div id="book-list"><p><em>Click a region to see books.</em></p></div>
+
+  <hr>
+  <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+
+  <script>
+    var AWARDS = [
+      {
+        key: 'caldecott', label: 'Caldecott', color: '#4a90d9',
+        test: function(li) {
+          return li.hasAttribute('data-caldecott-medal') || li.hasAttribute('data-caldecott-honor');
+        }
+      },
+      {
+        key: 'nyt', label: 'NYT Illustrated', color: '#e05555',
+        test: function(li) { return li.hasAttribute('data-nyt-illustrated'); }
+      },
+      {
+        key: 'cbca', label: 'CBCA', color: '#50a060',
+        test: function(li) { return li.hasAttribute('data-cbca-picture-book'); }
+      },
+      {
+        key: 'recommended', label: 'Community', color: '#b065c0',
+        test: function(li) { return li.hasAttribute('data-recommended'); }
+      }
+    ];
+
+    var STAR_COLOR = '#d4a017';
+
+    // Compute intersection area of two circles with radii r1, r2 at distance d
+    function intersectionArea(r1, r2, d) {
+      if (d >= r1 + r2) return 0;
+      if (d <= Math.abs(r1 - r2)) return Math.PI * Math.min(r1, r2) * Math.min(r1, r2);
+      var a = (d * d + r1 * r1 - r2 * r2) / (2 * d);
+      var b = d - a;
+      return r1 * r1 * Math.acos(a / r1) + r2 * r2 * Math.acos(b / r2)
+             - a * Math.sqrt(r1 * r1 - a * a)
+             - b * Math.sqrt(r2 * r2 - b * b);
+    }
+
+    // Binary search for distance d that gives target intersection area
+    function findDistance(r1, r2, targetArea) {
+      if (targetArea <= 0) return r1 + r2 + 10;
+      if (targetArea >= Math.PI * Math.min(r1, r2) * Math.min(r1, r2))
+        return Math.abs(r1 - r2);
+
+      var lo = Math.abs(r1 - r2), hi = r1 + r2;
+      for (var i = 0; i < 100; i++) {
+        var mid = (lo + hi) / 2;
+        if (intersectionArea(r1, r2, mid) > targetArea) lo = mid;
+        else hi = mid;
+      }
+      return (lo + hi) / 2;
+    }
+
+    // Compute intersection points of two circles on the x-axis
+    function intersectionPoints(cx1, cx2, cy, r1, r2) {
+      var d = cx2 - cx1;
+      var a = (d * d + r1 * r1 - r2 * r2) / (2 * d);
+      var h = Math.sqrt(Math.max(0, r1 * r1 - a * a));
+      var mx = cx1 + a;
+      return { x: mx, y1: cy - h, y2: cy + h };
+    }
+
+    function getTitle(li) {
+      var c = li.querySelector('cite');
+      return c ? c.textContent : '?';
+    }
+
+    function showList(label, items) {
+      var el = document.getElementById('book-list');
+      if (items.length === 0) {
+        el.innerHTML = '<h3>' + label + '</h3><p><em>None</em></p>';
+        return;
+      }
+      var html = '<h3>' + label + ' (' + items.length + ')</h3><ul>';
+      items.forEach(function(b) {
+        html += '<li><cite>' + b.title + '</cite> (' + b.year + ')</li>';
+      });
+      html += '</ul>';
+      el.innerHTML = html;
+    }
+
+    // Global stars count, set after fetch
+    var TOTAL_STARS = 0;
+
+    function makeVennSVG(award, sets) {
+      var nAward = sets.awardOnly.length + sets.both.length;
+      var nStars = TOTAL_STARS;
+      var nBoth = sets.both.length;
+
+      // Scale factor: stars circle (constant across diagrams) gets radius ~65px
+      var scale = (65 * 65 * Math.PI) / Math.max(nStars, 1);
+
+      var r1 = Math.sqrt(nAward * scale / Math.PI);
+      var r2 = Math.sqrt(nStars * scale / Math.PI); // always 65
+
+      // Minimum radii for visibility
+      r1 = Math.max(r1, 12);
+      r2 = Math.max(r2, 12);
+
+      var targetOverlapArea = nBoth * scale;
+      var d = findDistance(r1, r2, targetOverlapArea);
+
+      // Position circles centered in the SVG
+      var svgW = 280, svgH = 180;
+      var totalSpan = d + r1 + r2;
+      var cx1 = (svgW - totalSpan) / 2 + r1;
+      var cx2 = cx1 + d;
+      var cy = svgH / 2;
+
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
+      svg.setAttribute('width', svgW);
+      svg.setAttribute('height', svgH);
+
+      // Award circle
+      var c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c1.setAttribute('cx', cx1); c1.setAttribute('cy', cy); c1.setAttribute('r', r1);
+      c1.setAttribute('fill', award.color); c1.setAttribute('fill-opacity', '0.3');
+      c1.setAttribute('stroke', award.color); c1.setAttribute('stroke-width', '1.5');
+      svg.appendChild(c1);
+
+      // Stars circle
+      var c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c2.setAttribute('cx', cx2); c2.setAttribute('cy', cy); c2.setAttribute('r', r2);
+      c2.setAttribute('fill', STAR_COLOR); c2.setAttribute('fill-opacity', '0.3');
+      c2.setAttribute('stroke', STAR_COLOR); c2.setAttribute('stroke-width', '1.5');
+      svg.appendChild(c2);
+
+      // Click regions
+      var hasOverlap = d < r1 + r2 && d > Math.abs(r1 - r2);
+      var contained = d <= Math.abs(r1 - r2);
+
+      if (hasOverlap) {
+        var ip = intersectionPoints(cx1, cx2, cy, r1, r2);
+
+        // Award-only (left crescent)
+        var pAward = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pAward.setAttribute('class', 'region');
+        pAward.setAttribute('fill', 'transparent');
+        pAward.setAttribute('d',
+          'M ' + ip.x + ' ' + ip.y1 +
+          ' A ' + r1 + ' ' + r1 + ' 0 1 0 ' + ip.x + ' ' + ip.y2 +
+          ' A ' + r2 + ' ' + r2 + ' 0 0 1 ' + ip.x + ' ' + ip.y1 + ' Z');
+        pAward.addEventListener('click', function(e) {
+          e.stopPropagation();
+          showList(award.label + ' only', sets.awardOnly);
+        });
+        svg.appendChild(pAward);
+
+        // Stars-only (right crescent)
+        var pStars = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pStars.setAttribute('class', 'region');
+        pStars.setAttribute('fill', 'transparent');
+        pStars.setAttribute('d',
+          'M ' + ip.x + ' ' + ip.y1 +
+          ' A ' + r2 + ' ' + r2 + ' 0 1 1 ' + ip.x + ' ' + ip.y2 +
+          ' A ' + r1 + ' ' + r1 + ' 0 0 0 ' + ip.x + ' ' + ip.y1 + ' Z');
+        pStars.addEventListener('click', function(e) {
+          e.stopPropagation();
+          showList('Starred only (no ' + award.label + ')', sets.starsOnly);
+        });
+        svg.appendChild(pStars);
+
+        // Both (lens)
+        var pBoth = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pBoth.setAttribute('class', 'region');
+        pBoth.setAttribute('fill', 'transparent');
+        pBoth.setAttribute('d',
+          'M ' + ip.x + ' ' + ip.y1 +
+          ' A ' + r1 + ' ' + r1 + ' 0 0 1 ' + ip.x + ' ' + ip.y2 +
+          ' A ' + r2 + ' ' + r2 + ' 0 0 1 ' + ip.x + ' ' + ip.y1 + ' Z');
+        pBoth.addEventListener('click', function(e) {
+          e.stopPropagation();
+          showList(award.label + ' + Starred', sets.both);
+        });
+        svg.appendChild(pBoth);
+
+      } else if (contained) {
+        // One circle inside the other — make both clickable
+        var outer = r1 >= r2 ? c1 : c2;
+        var inner = r1 >= r2 ? c2 : c1;
+        // Whole area clickable as "both" via inner, "only" via outer
+        var pOuter = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pOuter.setAttribute('class', 'region');
+        pOuter.setAttribute('cx', r1 >= r2 ? cx1 : cx2);
+        pOuter.setAttribute('cy', cy);
+        pOuter.setAttribute('r', Math.max(r1, r2));
+        pOuter.setAttribute('fill', 'transparent');
+        pOuter.addEventListener('click', function(e) {
+          e.stopPropagation();
+          showList(r1 >= r2 ? award.label + ' only' : 'Starred only', r1 >= r2 ? sets.awardOnly : sets.starsOnly);
+        });
+        svg.appendChild(pOuter);
+
+        var pInner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pInner.setAttribute('class', 'region');
+        pInner.setAttribute('cx', r1 >= r2 ? cx2 : cx1);
+        pInner.setAttribute('cy', cy);
+        pInner.setAttribute('r', Math.min(r1, r2));
+        pInner.setAttribute('fill', 'transparent');
+        pInner.addEventListener('click', function(e) {
+          e.stopPropagation();
+          showList(award.label + ' + Starred', sets.both);
+        });
+        svg.appendChild(pInner);
+
+      } else {
+        // No overlap — separate circles clickable
+        var pA = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pA.setAttribute('class', 'region'); pA.setAttribute('fill', 'transparent');
+        pA.setAttribute('cx', cx1); pA.setAttribute('cy', cy); pA.setAttribute('r', r1);
+        pA.addEventListener('click', function(e) { e.stopPropagation(); showList(award.label + ' only', sets.awardOnly); });
+        svg.appendChild(pA);
+
+        var pS = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pS.setAttribute('class', 'region'); pS.setAttribute('fill', 'transparent');
+        pS.setAttribute('cx', cx2); pS.setAttribute('cy', cy); pS.setAttribute('r', r2);
+        pS.addEventListener('click', function(e) { e.stopPropagation(); showList('Starred only', sets.starsOnly); });
+        svg.appendChild(pS);
+
+      }
+
+      return svg;
+    }
+
+    function addCount(svg, x, y, n) {
+      var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', x); t.setAttribute('y', y + 5);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('font-family', 'monospace');
+      t.setAttribute('font-size', '14');
+      t.setAttribute('font-weight', 'bold');
+      t.setAttribute('fill', 'currentColor');
+      t.textContent = n;
+      svg.appendChild(t);
+    }
+
+    function addLabel(svg, x, y, text) {
+      var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', x); t.setAttribute('y', y);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('font-family', 'monospace');
+      t.setAttribute('font-size', '10');
+      t.setAttribute('fill', 'currentColor');
+      t.setAttribute('opacity', '0.6');
+      t.textContent = text;
+      svg.appendChild(t);
+    }
+
+    function buildHistogram(doc) {
+      var allBooks = doc.querySelectorAll('li[data-status]');
+      var byYear = {};
+
+      allBooks.forEach(function(li) {
+        var year = parseInt(li.getAttribute('data-year'), 10);
+        if (year < 1850) return;
+        var starred = li.hasAttribute('data-starred');
+        var title = getTitle(li);
+        if (!byYear[year]) byYear[year] = [];
+        byYear[year].push({ starred: starred, title: title });
+      });
+
+      var years = Object.keys(byYear).map(Number).sort(function(a, b) { return a - b; });
+      if (years.length === 0) return;
+
+      // Build display columns: include all years in populated ranges, collapse gaps >10 years
+      var columns = []; // { type: 'year', year: N } or { type: 'gap' }
+      var maxCount = 0;
+
+      for (var i = 0; i < years.length; i++) {
+        var y = years[i];
+        maxCount = Math.max(maxCount, byYear[y].length);
+
+        if (i > 0) {
+          var prevEnd = years[i - 1];
+          // Find the end of the previous populated cluster
+          // Walk back to find the last year we added
+          var lastAddedYear = columns.length > 0 ? columns[columns.length - 1].year : undefined;
+          var gapSize = y - (lastAddedYear || prevEnd) - 1;
+
+          if (years[i] - years[i - 1] > 10) {
+            // Big gap — insert ellipsis
+            columns.push({ type: 'gap' });
+          } else {
+            // Fill in intermediate empty years
+            var from = (lastAddedYear || prevEnd) + 1;
+            for (var fill = from; fill < y; fill++) {
+              columns.push({ type: 'year', year: fill });
+            }
+          }
+        }
+        columns.push({ type: 'year', year: y });
+
+        // If this is the last populated year, or next year has a big gap, we're done with this cluster
+        // But also fill to the end of a nice round number if close
+        if (i < years.length - 1 && years[i + 1] - y <= 10) {
+          // will be filled next iteration
+        }
+      }
+
+      var sq = 11;
+      var gap = 2;
+      var cell = sq + gap;
+      var gapW = 20; // width for "..." columns
+      var labelH = 40;
+      var padTop = 10;
+      var padL = 10;
+
+      // Calculate total width
+      var totalW = padL * 2;
+      columns.forEach(function(col) {
+        totalW += col.type === 'gap' ? gapW : cell;
+      });
+
+      var svgH = maxCount * cell + labelH + padTop;
+
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + totalW + ' ' + svgH);
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', svgH);
+      svg.style.maxWidth = totalW + 'px';
+
+      var baseY = svgH - labelH;
+      var x = padL;
+
+      columns.forEach(function(col) {
+        if (col.type === 'gap') {
+          var dots = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          dots.setAttribute('x', x + gapW / 2);
+          dots.setAttribute('y', baseY - 2);
+          dots.setAttribute('text-anchor', 'middle');
+          dots.setAttribute('font-family', 'monospace');
+          dots.setAttribute('font-size', '10');
+          dots.setAttribute('fill', 'currentColor');
+          dots.setAttribute('opacity', '0.4');
+          dots.textContent = '\u2026';
+          svg.appendChild(dots);
+          x += gapW;
+          return;
+        }
+
+        var year = col.year;
+        var books = byYear[year] || [];
+
+        books.forEach(function(book, i) {
+          var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', x);
+          rect.setAttribute('y', baseY - (i + 1) * cell);
+          rect.setAttribute('width', sq);
+          rect.setAttribute('height', sq);
+          rect.setAttribute('rx', 2);
+          rect.setAttribute('fill', book.starred ? '#d4a017' : '#666');
+          rect.setAttribute('class', 'hist-square');
+          var tt = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+          tt.textContent = book.title + ' (' + year + ')' + (book.starred ? ' \u2B50' : '');
+          rect.appendChild(tt);
+          svg.appendChild(rect);
+        });
+
+        // Year labels: show decade markers and first/last years
+        if (year % 10 === 0 || year === years[0] || year === years[years.length - 1]) {
+          var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', x + sq / 2);
+          label.setAttribute('y', baseY + 14);
+          label.setAttribute('text-anchor', 'middle');
+          label.setAttribute('font-family', 'monospace');
+          label.setAttribute('font-size', '8');
+          label.setAttribute('fill', 'currentColor');
+          label.setAttribute('opacity', '0.5');
+          label.setAttribute('transform', 'rotate(45 ' + (x + sq / 2) + ' ' + (baseY + 14) + ')');
+          label.textContent = year;
+          svg.appendChild(label);
+        }
+
+        x += cell;
+      });
+
+      document.getElementById('histogram').appendChild(svg);
+
+      // Stats: does year correlate with starring?
+      var points = [];
+      allBooks.forEach(function(li) {
+        var yr = parseInt(li.getAttribute('data-year'), 10);
+        if (yr < 1850) return;
+        points.push({ year: yr, starred: li.hasAttribute('data-starred') ? 1 : 0 });
+      });
+
+      var n = points.length;
+      if (n < 2) return;
+
+      var sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+      points.forEach(function(p) {
+        sumX += p.year; sumY += p.starred;
+        sumXY += p.year * p.starred;
+        sumX2 += p.year * p.year;
+        sumY2 += p.starred * p.starred;
+      });
+
+      var meanX = sumX / n, meanY = sumY / n;
+      var denom = Math.sqrt((sumX2 - n * meanX * meanX) * (sumY2 - n * meanY * meanY));
+      var r = denom > 0 ? (sumXY - n * meanX * meanY) / denom : 0;
+
+      // Mean year starred vs not
+      var starYears = [], nonYears = [];
+      points.forEach(function(p) {
+        if (p.starred) starYears.push(p.year);
+        else nonYears.push(p.year);
+      });
+      var meanStarYear = starYears.reduce(function(a, b) { return a + b; }, 0) / (starYears.length || 1);
+      var meanNonYear = nonYears.reduce(function(a, b) { return a + b; }, 0) / (nonYears.length || 1);
+
+      // Median
+      function median(arr) {
+        var s = arr.slice().sort(function(a, b) { return a - b; });
+        var mid = Math.floor(s.length / 2);
+        return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+      }
+
+      var rNote;
+      var absR = Math.abs(r);
+      if (absR < 0.1) rNote = 'negligible correlation';
+      else if (absR < 0.3) rNote = 'weak ' + (r > 0 ? 'positive' : 'negative');
+      else if (absR < 0.5) rNote = 'moderate ' + (r > 0 ? 'positive' : 'negative');
+      else rNote = 'strong ' + (r > 0 ? 'positive' : 'negative');
+      rNote += r > 0 ? ' — newer books more likely starred' : r < 0 ? ' — older books more likely starred' : '';
+
+      var el = document.getElementById('hist-stats');
+      el.innerHTML = '<div style="color:#d4a017;border-bottom:1px solid #444;padding-bottom:0.2em;margin-bottom:0.2em">Survivorship bias</div><table>' +
+        '<tr><td>r(year, star)</td><td>' + r.toFixed(3) + '</td><td>' + rNote + '</td></tr>' +
+        '<tr><td>mean year (starred)</td><td>' + meanStarYear.toFixed(0) + '</td><td></td></tr>' +
+        '<tr><td>mean year (unstarred)</td><td>' + meanNonYear.toFixed(0) + '</td><td>\u0394 = ' + Math.abs(meanStarYear - meanNonYear).toFixed(0) + ' years</td></tr>' +
+        '</table>';
+    }
+
+    fetch('index.html')
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var allBooks = doc.querySelectorAll('li[data-status]');
+
+        buildHistogram(doc);
+
+        // Count totals once
+        var totalBooks = allBooks.length;
+        allBooks.forEach(function(li) {
+          if (li.hasAttribute('data-starred')) TOTAL_STARS++;
+        });
+
+        var container = document.getElementById('venns');
+
+        AWARDS.forEach(function(award) {
+          var sets = { awardOnly: [], starsOnly: [], both: [] };
+
+          allBooks.forEach(function(li) {
+            var hasAward = award.test(li);
+            var isStarred = li.hasAttribute('data-starred');
+            if (!hasAward && !isStarred) return;
+
+            var entry = { title: getTitle(li), year: li.getAttribute('data-year') };
+            if (hasAward && isStarred) sets.both.push(entry);
+            else if (hasAward) sets.awardOnly.push(entry);
+            else sets.starsOnly.push(entry);
+          });
+
+          var card = document.createElement('div');
+          card.className = 'venn-card';
+          var h3 = document.createElement('h3');
+          h3.textContent = award.label + ' \u2229 Stars';
+          card.appendChild(h3);
+          card.appendChild(makeVennSVG(award, sets));
+
+          var nAward = sets.awardOnly.length + sets.both.length;
+          var nBoth = sets.both.length;
+          var nStarsTotal = TOTAL_STARS;
+          var nNotAward = totalBooks - nAward;
+          var nStarsNotAward = nStarsTotal - nBoth;
+
+          // p = P(star | award)
+          var p = nAward > 0 ? nBoth / nAward : 0;
+          // base rate P(star)
+          var pBase = totalBooks > 0 ? nStarsTotal / totalBooks : 0;
+          // lift
+          var lift = pBase > 0 ? p / pBase : 0;
+          // phi coefficient
+          var a = nBoth, b = nAward - nBoth, c = nStarsTotal - nBoth, d = totalBooks - nAward - nStarsTotal + nBoth;
+          var denom = Math.sqrt((a + b) * (c + d) * (a + c) * (b + d));
+          var phi = denom > 0 ? (a * d - b * c) / denom : 0;
+
+          var counts = document.createElement('div');
+          counts.className = 'venn-counts';
+          counts.innerHTML =
+            '<span style="color:' + award.color + '">' + award.label + ' only: ' + sets.awardOnly.length + '</span>' +
+            '<span style="color:#fff">Both: ' + sets.both.length + '</span>' +
+            '<span style="color:' + STAR_COLOR + '">Stars only: ' + sets.starsOnly.length + '</span>';
+          card.appendChild(counts);
+
+          var stats = document.createElement('div');
+          stats.className = 'venn-stats';
+          stats.innerHTML = '<table>' +
+            '<tr><td>p(star|award)</td><td>' + (p * 100).toFixed(0) + '%</td></tr>' +
+            '<tr><td>p(star)</td><td>' + (pBase * 100).toFixed(0) + '%</td></tr>' +
+            '<tr><td>lift</td><td>' + lift.toFixed(2) + 'x</td></tr>' +
+            '<tr><td>\u03C6</td><td>' + phi.toFixed(3) + '</td></tr>' +
+            '</table>';
+          card.appendChild(stats);
+
+          container.appendChild(card);
+        });
+      });
+  </script>
+</body>
+</html>
