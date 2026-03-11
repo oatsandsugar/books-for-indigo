@@ -15,7 +15,7 @@
     #hist-stats td:first-child { text-align: right; opacity: 0.7; }
     #hist-stats td:nth-child(2) { font-weight: bold; text-align: left; }
     #hist-stats td:nth-child(3) { text-align: left; }
-    .hist-square { transition: opacity 0.15s; }
+    .hist-square { transition: y 0.3s ease, opacity 0.2s ease; }
     .hist-square:hover { opacity: 0.7; }
     .venns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; }
     @media (max-width: 600px) { .venns { grid-template-columns: 1fr; } }
@@ -167,6 +167,10 @@
 
     // Global stars count, set after fetch
     var TOTAL_STARS = 0;
+    // Global histogram squares for selector filtering
+    var HIST_SQUARES = [];
+    var HIST_BASE_Y = 0;
+    var HIST_CELL = 0;
 
     function makeVennSVG(award, sets) {
       var nAward = sets.awardOnly.length + sets.both.length;
@@ -343,7 +347,7 @@
         var starred = li.hasAttribute('data-starred');
         var title = getTitle(li);
         if (!byYear[year]) byYear[year] = [];
-        byYear[year].push({ starred: starred, title: title });
+        byYear[year].push({ starred: starred, title: title, li: li });
       });
 
       var years = Object.keys(byYear).map(Number).sort(function(a, b) { return a - b; });
@@ -408,6 +412,7 @@
 
       var baseY = svgH - labelH;
       var x = padL;
+      var histSquares = [];
 
       columns.forEach(function(col) {
         if (col.type === 'gap') {
@@ -441,6 +446,7 @@
           tt.textContent = book.title + ' (' + year + ')' + (book.starred ? ' \u2B50' : '');
           rect.appendChild(tt);
           svg.appendChild(rect);
+          histSquares.push({ rect: rect, li: book.li, starred: book.starred, col: x, idx: i });
         });
 
         // Year labels: show decade markers and first/last years
@@ -462,6 +468,9 @@
       });
 
       document.getElementById('histogram').appendChild(svg);
+      HIST_SQUARES = histSquares;
+      HIST_BASE_Y = baseY;
+      HIST_CELL = cell;
 
       // Stats: does year correlate with starring?
       var points = [];
@@ -728,10 +737,37 @@
         if (!hasSelection) {
           // Reset circle opacity
           SETS.forEach(function(_, i) { svgCircles[i].setAttribute('fill-opacity', '0.2'); svgCircles[i].setAttribute('stroke-opacity', '1'); svgCircles[i].setAttribute('stroke-dasharray', 'none'); });
+          // Reset histogram — restore original positions
+          var resetCols = {};
+          HIST_SQUARES.forEach(function(hs) {
+            hs.rect.setAttribute('opacity', '1');
+            hs.rect.style.display = '';
+            // Re-stack by original index
+            if (!resetCols[hs.col]) resetCols[hs.col] = 0;
+            hs.rect.setAttribute('y', HIST_BASE_Y - (resetCols[hs.col] + 1) * HIST_CELL);
+            resetCols[hs.col]++;
+          });
           queryEl.textContent = '';
           listEl.innerHTML = '';
           return;
         }
+
+        // Filter histogram: hide non-matching, re-stack matching from baseline
+        var colCounts = {};
+        HIST_SQUARES.forEach(function(hs) {
+          var match = true;
+          includes.forEach(function(i) { if (!SETS[i].test(hs.li)) match = false; });
+          excludes.forEach(function(i) { if (SETS[i].test(hs.li)) match = false; });
+          if (match) {
+            if (!colCounts[hs.col]) colCounts[hs.col] = 0;
+            hs.rect.style.display = '';
+            hs.rect.setAttribute('opacity', '1');
+            hs.rect.setAttribute('y', HIST_BASE_Y - (colCounts[hs.col] + 1) * HIST_CELL);
+            colCounts[hs.col]++;
+          } else {
+            hs.rect.style.display = 'none';
+          }
+        });
 
         // Dim all circles when selection is active
         SETS.forEach(function(_, i) {
