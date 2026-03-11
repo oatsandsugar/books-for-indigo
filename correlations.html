@@ -40,6 +40,18 @@
     .legend { display: flex; gap: 1.2em; flex-wrap: wrap; justify-content: center; margin: 0.8em 0; font-size: small; }
     .legend span { display: flex; align-items: center; gap: 0.3em; }
     .legend .dot { width: 0.8em; height: 0.8em; border-radius: 50%; display: inline-block; }
+    #mongo svg { display: block; margin: 0 auto; }
+    #mongo-controls { display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center; margin: 0.8em 0; }
+    .set-btn { font-family: monospace; font-size: 0.85em; padding: 0.3em 0.8em; border: 2px solid; border-radius: 3px; cursor: pointer; background: transparent; color: inherit; opacity: 0.4; transition: all 0.15s; }
+    .set-btn:hover { opacity: 0.7; }
+    .set-btn.include { opacity: 1; font-weight: bold; }
+    .set-btn.exclude { opacity: 1; text-decoration: line-through; }
+    #mongo-query { text-align: center; font-size: 0.85em; margin: 0.5em 0; min-height: 1.5em; opacity: 0.7; }
+    #mongo-book-list { margin-top: 1em; min-height: 2em; }
+    #mongo-book-list h3 { margin: 0 0 0.5em; }
+    #mongo-book-list ul { margin: 0; padding-left: 1.5em; columns: 2; }
+    @media (max-width: 600px) { #mongo-book-list ul { columns: 1; } }
+    #mongo-book-list li { margin: 0.2em 0; break-inside: avoid; }
   </style>
 </head>
 <body>
@@ -50,7 +62,15 @@
 
   <div id="hist-stats"></div>
 
-  <h2>Awards &cap; Stars</h2>
+  <h2>All Awards &cap; Stars</h2>
+  <p>Click to include, click again to exclude, click again to reset. Circle areas proportional to set sizes.</p>
+
+  <div id="mongo-controls"></div>
+  <div id="mongo-query"></div>
+  <div id="mongo"></div>
+  <div id="mongo-book-list"></div>
+
+  <h2>Pairwise: Award &cap; Stars</h2>
   <p>Circle areas and overlaps are proportional to book counts.</p>
 
   <div class="legend">
@@ -498,6 +518,337 @@
         '</table>';
     }
 
+    function buildMongoDiagram(doc) {
+      var allBooks = doc.querySelectorAll('li[data-status]');
+
+      // Define all sets including Stars
+      var SETS = [
+        { key: 'stars', label: 'Starred', color: STAR_COLOR, test: function(li) { return li.hasAttribute('data-starred'); } }
+      ].concat(AWARDS);
+
+      var n = SETS.length;
+
+      // Compute members for each set
+      var members = {};
+      SETS.forEach(function(s) { members[s.key] = []; });
+      allBooks.forEach(function(li) {
+        var title = getTitle(li);
+        var year = li.getAttribute('data-year');
+        var entry = { title: title, year: year };
+        SETS.forEach(function(s) {
+          if (s.test(li)) members[s.key].push(entry);
+        });
+      });
+
+      // Compute pairwise intersection counts
+      var pairCount = [];
+      for (var i = 0; i < n; i++) {
+        pairCount[i] = [];
+        for (var j = 0; j < n; j++) {
+          if (i === j) { pairCount[i][j] = members[SETS[i].key].length; continue; }
+          var count = 0;
+          allBooks.forEach(function(li) {
+            if (SETS[i].test(li) && SETS[j].test(li)) count++;
+          });
+          pairCount[i][j] = count;
+        }
+      }
+
+      // Scale: largest set gets radius ~90px
+      var maxCount = 0;
+      SETS.forEach(function(s) { maxCount = Math.max(maxCount, members[s.key].length); });
+      var scaleFactor = (90 * 90 * Math.PI) / Math.max(maxCount, 1);
+      var radii = SETS.map(function(s) {
+        return Math.max(Math.sqrt(members[s.key].length * scaleFactor / Math.PI), 15);
+      });
+
+      // Compute target distances
+      var targetDist = [];
+      for (var i = 0; i < n; i++) {
+        targetDist[i] = [];
+        for (var j = 0; j < n; j++) {
+          if (i === j) { targetDist[i][j] = 0; continue; }
+          var targetArea = pairCount[i][j] * scaleFactor;
+          targetDist[i][j] = findDistance(radii[i], radii[j], targetArea);
+        }
+      }
+
+      // Initialise positions in a circle layout
+      var cx = 250, cy = 200;
+      var layoutR = 60;
+      var pos = SETS.map(function(_, i) {
+        var angle = (2 * Math.PI * i / n) - Math.PI / 2;
+        return { x: cx + layoutR * Math.cos(angle), y: cy + layoutR * Math.sin(angle) };
+      });
+
+      // Stress minimisation
+      for (var iter = 0; iter < 300; iter++) {
+        var lr = 0.1 * (1 - iter / 300);
+        for (var i = 0; i < n; i++) {
+          var fx = 0, fy = 0;
+          for (var j = 0; j < n; j++) {
+            if (i === j) continue;
+            var dx = pos[i].x - pos[j].x;
+            var dy = pos[i].y - pos[j].y;
+            var d = Math.sqrt(dx * dx + dy * dy) || 0.1;
+            var td = targetDist[i][j];
+            var force = (d - td) / d;
+            fx -= lr * force * dx;
+            fy -= lr * force * dy;
+          }
+          pos[i].x += fx;
+          pos[i].y += fy;
+        }
+        var avgX = 0, avgY = 0;
+        pos.forEach(function(p) { avgX += p.x; avgY += p.y; });
+        avgX /= n; avgY /= n;
+        pos.forEach(function(p) { p.x += cx - avgX; p.y += cy - avgY; });
+      }
+
+      // Fit to bounding box
+      var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      pos.forEach(function(p, i) {
+        minX = Math.min(minX, p.x - radii[i]);
+        maxX = Math.max(maxX, p.x + radii[i]);
+        minY = Math.min(minY, p.y - radii[i]);
+        maxY = Math.max(maxY, p.y + radii[i]);
+      });
+      var pad = 40;
+      var drawW = maxX - minX + pad * 2;
+      var drawH = maxY - minY + pad * 2;
+      var offsetX = -minX + pad;
+      var offsetY = -minY + pad;
+
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + drawW + ' ' + drawH);
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', drawH);
+      svg.style.maxWidth = drawW + 'px';
+
+      // Draw circles (largest first for z-order)
+      var order = SETS.map(function(_, i) { return i; });
+      order.sort(function(a, b) { return radii[b] - radii[a]; });
+
+      var svgCircles = []; // store SVG circle elements for highlighting
+      order.forEach(function(i) {
+        var s = SETS[i];
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos[i].x + offsetX);
+        circle.setAttribute('cy', pos[i].y + offsetY);
+        circle.setAttribute('r', radii[i]);
+        circle.setAttribute('fill', s.color);
+        circle.setAttribute('fill-opacity', '0.2');
+        circle.setAttribute('stroke', s.color);
+        circle.setAttribute('stroke-width', '1.5');
+        circle.setAttribute('pointer-events', 'none');
+        circle.setAttribute('data-set-index', i);
+        svg.appendChild(circle);
+        svgCircles[i] = circle;
+      });
+
+      // Labels on top
+      order.slice().reverse().forEach(function(i) {
+        var s = SETS[i];
+        var px = pos[i].x + offsetX;
+        var py = pos[i].y + offsetY;
+        var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', px);
+        text.setAttribute('y', py);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-family', 'monospace');
+        text.setAttribute('font-size', radii[i] > 30 ? '11' : '9');
+        text.setAttribute('fill', 'currentColor');
+        text.setAttribute('pointer-events', 'none');
+        text.textContent = s.label;
+        svg.appendChild(text);
+
+        var count = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        count.setAttribute('x', px);
+        count.setAttribute('y', py + 14);
+        count.setAttribute('text-anchor', 'middle');
+        count.setAttribute('font-family', 'monospace');
+        count.setAttribute('font-size', '10');
+        count.setAttribute('fill', 'currentColor');
+        count.setAttribute('opacity', '0.7');
+        count.setAttribute('pointer-events', 'none');
+        count.textContent = '(' + members[s.key].length + ')';
+        svg.appendChild(count);
+      });
+
+      // Add a <defs> for dynamic clipPaths/masks and a highlight group
+      var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      svg.appendChild(defs);
+      var highlightGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      highlightGroup.setAttribute('pointer-events', 'none');
+      svg.appendChild(highlightGroup);
+
+      // Circle geometry for building clips
+      var circleGeo = SETS.map(function(_, i) {
+        return { cx: pos[i].x + offsetX, cy: pos[i].y + offsetY, r: radii[i] };
+      });
+
+      document.getElementById('mongo').appendChild(svg);
+
+      // --- Selector buttons ---
+      var states = SETS.map(function() { return 0; });
+      var controls = document.getElementById('mongo-controls');
+
+      var buttons = SETS.map(function(s, i) {
+        var btn = document.createElement('button');
+        btn.className = 'set-btn';
+        btn.style.borderColor = s.color;
+        btn.textContent = s.label;
+        btn.addEventListener('click', function() {
+          states[i] = (states[i] + 1) % 3;
+          updateSelector();
+        });
+        controls.appendChild(btn);
+        return btn;
+      });
+
+      var hlId = 0; // unique ID counter for clipPaths/masks
+
+      function updateSelector() {
+        var includes = [], excludes = [];
+        SETS.forEach(function(s, i) {
+          buttons[i].className = 'set-btn' + (states[i] === 1 ? ' include' : states[i] === 2 ? ' exclude' : '');
+          buttons[i].style.background = states[i] === 1 ? s.color + '33' : states[i] === 2 ? '#3332' : 'transparent';
+          if (states[i] === 1) includes.push(i);
+          if (states[i] === 2) excludes.push(i);
+        });
+
+        // Clear old highlight elements
+        while (defs.firstChild) defs.removeChild(defs.firstChild);
+        while (highlightGroup.firstChild) highlightGroup.removeChild(highlightGroup.firstChild);
+
+        var queryEl = document.getElementById('mongo-query');
+        var listEl = document.getElementById('mongo-book-list');
+        var hasSelection = includes.length > 0 || excludes.length > 0;
+
+        if (!hasSelection) {
+          // Reset circle opacity
+          SETS.forEach(function(_, i) { svgCircles[i].setAttribute('fill-opacity', '0.2'); svgCircles[i].setAttribute('stroke-opacity', '1'); svgCircles[i].setAttribute('stroke-dasharray', 'none'); });
+          queryEl.textContent = '';
+          listEl.innerHTML = '';
+          return;
+        }
+
+        // Dim all circles when selection is active
+        SETS.forEach(function(_, i) {
+          svgCircles[i].setAttribute('fill-opacity', '0.08');
+          svgCircles[i].setAttribute('stroke-opacity', states[i] === 2 ? '0.15' : '0.3');
+          svgCircles[i].setAttribute('stroke-dasharray', states[i] === 2 ? '4 3' : 'none');
+        });
+
+        // Spotlight: dark overlay with the selected region cut out via mask
+        hlId++;
+
+        // Build a mask where white = darken, black = spotlight (reveal)
+        // We want: dark everywhere EXCEPT (intersection of includes \ excludes)
+        // Mask approach: white everywhere (dark overlay shows), then black in selected region (dark overlay hidden)
+        var spotMaskId = 'spot-' + hlId;
+        var spotMask = document.createElementNS('http://www.w3.org/2000/svg', 'mask');
+        spotMask.setAttribute('id', spotMaskId);
+
+        // White circles = overlay only covers the union of all set circles
+        circleGeo.forEach(function(cg) {
+          var wc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          wc.setAttribute('cx', cg.cx);
+          wc.setAttribute('cy', cg.cy);
+          wc.setAttribute('r', cg.r);
+          wc.setAttribute('fill', 'white');
+          spotMask.appendChild(wc);
+        });
+
+        if (includes.length > 0) {
+          // Black shape = intersection of includes, minus excludes
+          // To get intersection in the mask, nest clipPaths on a black rect
+
+          // Create clipPaths for each include circle
+          var clipIds = includes.map(function(idx, k) {
+            var clipId = 'sc-' + hlId + '-' + k;
+            var cp = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+            cp.setAttribute('id', clipId);
+            var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            c.setAttribute('cx', circleGeo[idx].cx);
+            c.setAttribute('cy', circleGeo[idx].cy);
+            c.setAttribute('r', circleGeo[idx].r);
+            cp.appendChild(c);
+            defs.appendChild(cp);
+            return clipId;
+          });
+
+          // Inner black rect (reveals through spotlight)
+          var blackRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          blackRect.setAttribute('x', '0'); blackRect.setAttribute('y', '0');
+          blackRect.setAttribute('width', drawW); blackRect.setAttribute('height', drawH);
+          blackRect.setAttribute('fill', 'black');
+
+          // Wrap in nested clip groups for intersection
+          var current = blackRect;
+          for (var k = clipIds.length - 1; k >= 0; k--) {
+            var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('clip-path', 'url(#' + clipIds[k] + ')');
+            g.appendChild(current);
+            current = g;
+          }
+          spotMask.appendChild(current);
+
+          // White circles on top to re-cover excluded regions (put dark overlay back)
+          excludes.forEach(function(idx) {
+            var wc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            wc.setAttribute('cx', circleGeo[idx].cx);
+            wc.setAttribute('cy', circleGeo[idx].cy);
+            wc.setAttribute('r', circleGeo[idx].r);
+            wc.setAttribute('fill', 'white');
+            spotMask.appendChild(wc);
+          });
+        }
+
+        defs.appendChild(spotMask);
+
+        // Dark overlay with the mask applied
+        var overlay = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        overlay.setAttribute('x', '0'); overlay.setAttribute('y', '0');
+        overlay.setAttribute('width', drawW); overlay.setAttribute('height', drawH);
+        overlay.setAttribute('fill', '#000');
+        overlay.setAttribute('fill-opacity', '0.55');
+        overlay.setAttribute('mask', 'url(#' + spotMaskId + ')');
+        highlightGroup.appendChild(overlay);
+
+        // Build query label
+        var parts = includes.map(function(i) { return SETS[i].label; });
+        var label = parts.join(' \u2229 ');
+        if (excludes.length > 0) {
+          label += (label ? ' ' : '') + '\\ ' + excludes.map(function(i) { return SETS[i].label; }).join(', ');
+        }
+        queryEl.textContent = label;
+
+        // Filter books
+        var items = [];
+        allBooks.forEach(function(li) {
+          var ok = true;
+          includes.forEach(function(i) {
+            if (!SETS[i].test(li)) ok = false;
+          });
+          excludes.forEach(function(i) {
+            if (SETS[i].test(li)) ok = false;
+          });
+          if (ok) items.push({ title: getTitle(li), year: li.getAttribute('data-year') });
+        });
+
+        var html = '<h3>' + label + ' (' + items.length + ')</h3>';
+        if (items.length === 0) {
+          html += '<p><em>None</em></p>';
+        } else {
+          html += '<ul>';
+          items.forEach(function(b) { html += '<li><cite>' + b.title + '</cite> (' + b.year + ')</li>'; });
+          html += '</ul>';
+        }
+        listEl.innerHTML = html;
+      }
+    }
+
     fetch('index.html')
       .then(function(r) { return r.text(); })
       .then(function(html) {
@@ -505,6 +856,7 @@
         var allBooks = doc.querySelectorAll('li[data-status]');
 
         buildHistogram(doc);
+        buildMongoDiagram(doc);
 
         // Count totals once
         var totalBooks = allBooks.length;
