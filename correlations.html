@@ -167,6 +167,8 @@
 
     // Global stars count, set after fetch
     var TOTAL_STARS = 0;
+    // Global histogram squares for selector filtering
+    var HIST_SQUARES = [];
 
     function makeVennSVG(award, sets) {
       var nAward = sets.awardOnly.length + sets.both.length;
@@ -343,7 +345,7 @@
         var starred = li.hasAttribute('data-starred');
         var title = getTitle(li);
         if (!byYear[year]) byYear[year] = [];
-        byYear[year].push({ starred: starred, title: title });
+        byYear[year].push({ starred: starred, title: title, li: li });
       });
 
       var years = Object.keys(byYear).map(Number).sort(function(a, b) { return a - b; });
@@ -408,6 +410,7 @@
 
       var baseY = svgH - labelH;
       var x = padL;
+      var histSquares = []; // { rect, li } for selector filtering
 
       columns.forEach(function(col) {
         if (col.type === 'gap') {
@@ -441,6 +444,7 @@
           tt.textContent = book.title + ' (' + year + ')' + (book.starred ? ' \u2B50' : '');
           rect.appendChild(tt);
           svg.appendChild(rect);
+          histSquares.push({ rect: rect, li: book.li, starred: book.starred });
         });
 
         // Year labels: show decade markers and first/last years
@@ -462,6 +466,7 @@
       });
 
       document.getElementById('histogram').appendChild(svg);
+      HIST_SQUARES = histSquares;
 
       // Stats: does year correlate with starring?
       var points = [];
@@ -728,10 +733,23 @@
         if (!hasSelection) {
           // Reset circle opacity
           SETS.forEach(function(_, i) { svgCircles[i].setAttribute('fill-opacity', '0.2'); svgCircles[i].setAttribute('stroke-opacity', '1'); svgCircles[i].setAttribute('stroke-dasharray', 'none'); });
+          // Reset histogram
+          HIST_SQUARES.forEach(function(hs) {
+            hs.rect.setAttribute('fill', hs.starred ? '#d4a017' : '#666');
+            hs.rect.setAttribute('opacity', '1');
+          });
           queryEl.textContent = '';
           listEl.innerHTML = '';
           return;
         }
+
+        // Filter histogram squares
+        HIST_SQUARES.forEach(function(hs) {
+          var match = true;
+          includes.forEach(function(i) { if (!SETS[i].test(hs.li)) match = false; });
+          excludes.forEach(function(i) { if (SETS[i].test(hs.li)) match = false; });
+          hs.rect.setAttribute('opacity', match ? '1' : '0.12');
+        });
 
         // Dim all circles when selection is active
         SETS.forEach(function(_, i) {
