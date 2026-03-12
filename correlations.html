@@ -207,7 +207,15 @@
       r2 = Math.max(r2, 12);
 
       var targetOverlapArea = nBoth * scale;
-      var d = findDistance(r1, r2, targetOverlapArea);
+      var d;
+      // Force containment when one set is a subset of the other
+      if (nBoth >= nAward && nAward > 0) {
+        d = Math.abs(r2 - r1) * 0.5; // award fully inside stars
+      } else if (nBoth >= nStars && nStars > 0) {
+        d = Math.abs(r1 - r2) * 0.5; // stars fully inside award
+      } else {
+        d = findDistance(r1, r2, targetOverlapArea);
+      }
 
       // Position circles centered in the SVG
       var svgW = 280, svgH = 180;
