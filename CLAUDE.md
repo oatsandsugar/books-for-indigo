@@ -61,6 +61,12 @@ Currently-reading books are marked with `(currently reading)` prefix text.
 
 ## Future ideas
 
+- "Starred" page with a line or two about each starred book
+- Book / star count on the correlations (stats) page
+- Standardize page footers across all pages
+- Better navigation between pages
+- Auto-discover pages for sitemap.xml
+- SEO best practices audit
 - Filter/highlight buttons in the UI (starred, by decade, currently reading, etc.)
 - Favorite libraries section
 - More awards (Newbery, etc.) — Greenaway and CBCA checklists already added
