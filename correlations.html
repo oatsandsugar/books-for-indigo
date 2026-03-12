@@ -228,6 +228,8 @@
       svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
       svg.setAttribute('width', svgW);
       svg.setAttribute('height', svgH);
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Venn diagram: ' + award.label + ' (' + sets.award + ' books) vs Starred (' + sets.stars + ' books), ' + sets.both + ' in common');
 
       // Award circle
       var c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -435,6 +437,8 @@
       svg.setAttribute('viewBox', '0 0 ' + totalW + ' ' + svgH);
       svg.setAttribute('width', '100%');
       svg.setAttribute('height', svgH);
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Histogram of books by publication year, stacked by award category');
       svg.style.maxWidth = totalW + 'px';
 
       var baseY = svgH - labelH;
@@ -604,8 +608,20 @@
         targetDist[i] = [];
         for (var j = 0; j < n; j++) {
           if (i === j) { targetDist[i][j] = 0; continue; }
-          var targetArea = pairCount[i][j] * scaleFactor;
-          targetDist[i][j] = findDistance(radii[i], radii[j], targetArea);
+          var overlap = pairCount[i][j];
+          var countI = members[SETS[i].key].length;
+          var countJ = members[SETS[j].key].length;
+          // If one set is a complete subset of the other, place fully inside
+          if (overlap > 0 && overlap >= countI) {
+            // i is a subset of j — place i inside j
+            targetDist[i][j] = Math.max(0, radii[j] - radii[i]) * 0.5;
+          } else if (overlap > 0 && overlap >= countJ) {
+            // j is a subset of i — place j inside i
+            targetDist[i][j] = Math.max(0, radii[i] - radii[j]) * 0.5;
+          } else {
+            var targetArea = overlap * scaleFactor;
+            targetDist[i][j] = findDistance(radii[i], radii[j], targetArea);
+          }
         }
       }
 
@@ -680,6 +696,8 @@
       svg.setAttribute('viewBox', '0 0 ' + drawW + ' ' + drawH);
       svg.setAttribute('width', '100%');
       svg.setAttribute('height', drawH);
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Euler diagram showing overlaps between ' + SETS.map(function(s) { return s.label; }).join(', '));
       svg.style.maxWidth = drawW + 'px';
 
       // Draw circles (largest first for z-order)
