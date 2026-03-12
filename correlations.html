@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="Venn diagrams of awards and starred favourites from Books for Indigo.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
@@ -15,7 +16,7 @@
     #hist-stats td:first-child { text-align: right; opacity: 0.7; }
     #hist-stats td:nth-child(2) { font-weight: bold; text-align: left; }
     #hist-stats td:nth-child(3) { text-align: left; }
-    .hist-square { transition: opacity 0.15s; }
+    .hist-square { transition: y 0.3s ease, opacity 0.2s ease; }
     .hist-square:hover { opacity: 0.7; }
     .venns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; }
     @media (max-width: 600px) { .venns { grid-template-columns: 1fr; } }
@@ -73,13 +74,7 @@
   <h2>Pairwise: Award &cap; Stars</h2>
   <p>Circle areas and overlaps are proportional to book counts.</p>
 
-  <div class="legend">
-    <span><span class="dot" style="background:#d4a017;opacity:0.7"></span> Starred</span>
-    <span><span class="dot" style="background:#4a90d9;opacity:0.7"></span> Caldecott</span>
-    <span><span class="dot" style="background:#e05555;opacity:0.7"></span> NYT Best Illustrated</span>
-    <span><span class="dot" style="background:#50a060;opacity:0.7"></span> CBCA Picture Book</span>
-    <span><span class="dot" style="background:#b065c0;opacity:0.7"></span> Community Recommended</span>
-  </div>
+  <div class="legend" id="pairwise-legend"></div>
 
   <div class="venns" id="venns"></div>
   <div id="book-list"><p><em>Click a region to see books.</em></p></div>
@@ -88,27 +83,51 @@
   <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
 
   <script>
-    var AWARDS = [
-      {
-        key: 'caldecott', label: 'Caldecott', color: '#4a90d9',
-        test: function(li) {
-          return li.hasAttribute('data-caldecott-medal') || li.hasAttribute('data-caldecott-honor');
-        }
-      },
-      {
-        key: 'nyt', label: 'NYT Illustrated', color: '#e05555',
-        test: function(li) { return li.hasAttribute('data-nyt-illustrated'); }
-      },
-      {
-        key: 'cbca', label: 'CBCA', color: '#50a060',
-        test: function(li) { return li.hasAttribute('data-cbca-picture-book'); }
-      },
-      {
-        key: 'recommended', label: 'Community', color: '#b065c0',
-        test: function(li) { return li.hasAttribute('data-recommended'); }
-      }
-    ];
+    // Structural attributes to exclude from award auto-discovery
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred'];
+    // Color palette for auto-discovered awards
+    var PALETTE = ['#4a90d9', '#e05555', '#50a060', '#b065c0', '#d98a4a', '#5bbcd6', '#d94a7b', '#8a9a5b'];
 
+    // Prettify attribute names: data-caldecott-medal -> Caldecott, data-nyt-illustrated -> NYT Illustrated
+    function prettyLabel(attr) {
+      var name = attr.replace(/^data-/, '').replace(/-medal$/, '').replace(/-honor$/, '').replace(/-book$/, '');
+      return name.split('-').map(function(w) {
+        if (w.length <= 4) return w.toUpperCase();
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+    }
+
+    // Group related attributes (e.g. caldecott-medal + caldecott-honor -> one "Caldecott" award)
+    function awardKey(attr) {
+      return attr.replace(/^data-/, '').replace(/-(medal|honor|book)$/, '');
+    }
+
+    function discoverAwards(allBooks) {
+      var found = {}; // key -> [attr1, attr2, ...]
+      allBooks.forEach(function(li) {
+        Array.prototype.forEach.call(li.attributes, function(a) {
+          if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
+          var key = awardKey(a.name);
+          if (!found[key]) found[key] = [];
+          if (found[key].indexOf(a.name) === -1) found[key].push(a.name);
+        });
+      });
+
+      var keys = Object.keys(found);
+      return keys.map(function(key, i) {
+        var attrs = found[key];
+        return {
+          key: key,
+          label: prettyLabel(attrs[0]),
+          color: PALETTE[i % PALETTE.length],
+          test: function(li) {
+            return attrs.some(function(a) { return li.hasAttribute(a); });
+          }
+        };
+      });
+    }
+
+    var AWARDS = []; // populated after fetch
     var STAR_COLOR = '#d4a017';
 
     // Compute intersection area of two circles with radii r1, r2 at distance d
@@ -167,6 +186,10 @@
 
     // Global stars count, set after fetch
     var TOTAL_STARS = 0;
+    // Global histogram squares for selector filtering
+    var HIST_SQUARES = [];
+    var HIST_BASE_Y = 0;
+    var HIST_CELL = 0;
 
     function makeVennSVG(award, sets) {
       var nAward = sets.awardOnly.length + sets.both.length;
@@ -184,7 +207,15 @@
       r2 = Math.max(r2, 12);
 
       var targetOverlapArea = nBoth * scale;
-      var d = findDistance(r1, r2, targetOverlapArea);
+      var d;
+      // Force containment when one set is a subset of the other
+      if (nBoth >= nAward && nAward > 0) {
+        d = Math.abs(r2 - r1) * 0.5; // award fully inside stars
+      } else if (nBoth >= nStars && nStars > 0) {
+        d = Math.abs(r1 - r2) * 0.5; // stars fully inside award
+      } else {
+        d = findDistance(r1, r2, targetOverlapArea);
+      }
 
       // Position circles centered in the SVG
       var svgW = 280, svgH = 180;
@@ -343,7 +374,7 @@
         var starred = li.hasAttribute('data-starred');
         var title = getTitle(li);
         if (!byYear[year]) byYear[year] = [];
-        byYear[year].push({ starred: starred, title: title });
+        byYear[year].push({ starred: starred, title: title, li: li });
       });
 
       var years = Object.keys(byYear).map(Number).sort(function(a, b) { return a - b; });
@@ -408,6 +439,7 @@
 
       var baseY = svgH - labelH;
       var x = padL;
+      var histSquares = [];
 
       columns.forEach(function(col) {
         if (col.type === 'gap') {
@@ -441,6 +473,7 @@
           tt.textContent = book.title + ' (' + year + ')' + (book.starred ? ' \u2B50' : '');
           rect.appendChild(tt);
           svg.appendChild(rect);
+          histSquares.push({ rect: rect, li: book.li, starred: book.starred, col: x, idx: i });
         });
 
         // Year labels: show decade markers and first/last years
@@ -462,6 +495,9 @@
       });
 
       document.getElementById('histogram').appendChild(svg);
+      HIST_SQUARES = histSquares;
+      HIST_BASE_Y = baseY;
+      HIST_CELL = cell;
 
       // Stats: does year correlate with starring?
       var points = [];
@@ -554,10 +590,10 @@
         }
       }
 
-      // Scale: largest set gets radius ~90px
+      // Scale: largest set gets radius ~140px
       var maxCount = 0;
       SETS.forEach(function(s) { maxCount = Math.max(maxCount, members[s.key].length); });
-      var scaleFactor = (90 * 90 * Math.PI) / Math.max(maxCount, 1);
+      var scaleFactor = (140 * 140 * Math.PI) / Math.max(maxCount, 1);
       var radii = SETS.map(function(s) {
         return Math.max(Math.sqrt(members[s.key].length * scaleFactor / Math.PI), 15);
       });
@@ -574,8 +610,8 @@
       }
 
       // Initialise positions in a circle layout
-      var cx = 250, cy = 200;
-      var layoutR = 60;
+      var cx = 350, cy = 300;
+      var layoutR = 100;
       var pos = SETS.map(function(_, i) {
         var angle = (2 * Math.PI * i / n) - Math.PI / 2;
         return { x: cx + layoutR * Math.cos(angle), y: cy + layoutR * Math.sin(angle) };
@@ -603,6 +639,27 @@
         pos.forEach(function(p) { avgX += p.x; avgY += p.y; });
         avgX /= n; avgY /= n;
         pos.forEach(function(p) { p.x += cx - avgX; p.y += cy - avgY; });
+      }
+
+      // Post-process: enforce separation for zero-overlap pairs
+      for (var pass = 0; pass < 50; pass++) {
+        for (var i = 0; i < n; i++) {
+          for (var j = i + 1; j < n; j++) {
+            if (pairCount[i][j] > 0) continue; // they should overlap, skip
+            var dx = pos[j].x - pos[i].x;
+            var dy = pos[j].y - pos[i].y;
+            var d = Math.sqrt(dx * dx + dy * dy) || 0.1;
+            var minDist = radii[i] + radii[j] + 2;
+            if (d < minDist) {
+              var push = (minDist - d) / 2;
+              var nx = dx / d, ny = dy / d;
+              pos[i].x -= push * nx;
+              pos[i].y -= push * ny;
+              pos[j].x += push * nx;
+              pos[j].y += push * ny;
+            }
+          }
+        }
       }
 
       // Fit to bounding box
@@ -728,10 +785,37 @@
         if (!hasSelection) {
           // Reset circle opacity
           SETS.forEach(function(_, i) { svgCircles[i].setAttribute('fill-opacity', '0.2'); svgCircles[i].setAttribute('stroke-opacity', '1'); svgCircles[i].setAttribute('stroke-dasharray', 'none'); });
+          // Reset histogram — restore original positions
+          var resetCols = {};
+          HIST_SQUARES.forEach(function(hs) {
+            hs.rect.setAttribute('opacity', '1');
+            hs.rect.style.display = '';
+            // Re-stack by original index
+            if (!resetCols[hs.col]) resetCols[hs.col] = 0;
+            hs.rect.setAttribute('y', HIST_BASE_Y - (resetCols[hs.col] + 1) * HIST_CELL);
+            resetCols[hs.col]++;
+          });
           queryEl.textContent = '';
           listEl.innerHTML = '';
           return;
         }
+
+        // Filter histogram: hide non-matching, re-stack matching from baseline
+        var colCounts = {};
+        HIST_SQUARES.forEach(function(hs) {
+          var match = true;
+          includes.forEach(function(i) { if (!SETS[i].test(hs.li)) match = false; });
+          excludes.forEach(function(i) { if (SETS[i].test(hs.li)) match = false; });
+          if (match) {
+            if (!colCounts[hs.col]) colCounts[hs.col] = 0;
+            hs.rect.style.display = '';
+            hs.rect.setAttribute('opacity', '1');
+            hs.rect.setAttribute('y', HIST_BASE_Y - (colCounts[hs.col] + 1) * HIST_CELL);
+            colCounts[hs.col]++;
+          } else {
+            hs.rect.style.display = 'none';
+          }
+        });
 
         // Dim all circles when selection is active
         SETS.forEach(function(_, i) {
@@ -854,6 +938,16 @@
       .then(function(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var allBooks = doc.querySelectorAll('li[data-status]');
+
+        // Auto-discover awards from data attributes
+        AWARDS = discoverAwards(allBooks);
+
+        // Build dynamic legend
+        var legendEl = document.getElementById('pairwise-legend');
+        legendEl.innerHTML = '<span><span class="dot" style="background:' + STAR_COLOR + ';opacity:0.7"></span> Starred</span>';
+        AWARDS.forEach(function(a) {
+          legendEl.innerHTML += '<span><span class="dot" style="background:' + a.color + ';opacity:0.7"></span> ' + a.label + '</span>';
+        });
 
         buildHistogram(doc);
         buildMongoDiagram(doc);
