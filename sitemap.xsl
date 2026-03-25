@@ -9,7 +9,7 @@
   <meta charset="utf-8"/>
   <meta name="color-scheme" content="dark light"/>
   <title>Sitemap — Books for Indigo</title>
-  <style>body { font-family: monospace; max-width: 60ch; margin: 2em auto; padding: 0 1em; }</style>
+  <style>body { font-family: monospace; }</style>
 </head>
 <body>
   <h1>Sitemap</h1>
