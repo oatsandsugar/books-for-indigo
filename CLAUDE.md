@@ -31,12 +31,13 @@ Each book is a `<li>` with:
 - `data-caldecott-honor` — Caldecott Honor year (value = award year)
 - `data-nyt-illustrated` — NYT Best Illustrated year (value = award year)
 - `data-recommended` — boolean attribute for community-recommended books (from GitHub issues)
+- `data-added` — date the book was added to the list (YYYY-MM-DD, approximate — based on commit date). JS shows a "NEW" badge for books added within the last 2 weeks.
 
 Currently-reading books are marked with `(currently reading)` prefix text.
 
 ## Conventions
 
-- Minimal CSS, no JS. Page works as pure HTML.
+- Minimal CSS, tiny JS for the "NEW" badge only. Page works without JS.
 - When adding a book, include all data attributes. Match the existing format.
 - Books are sorted by `data-year` within each section.
 - `&` must be escaped as `&amp;` in HTML.
@@ -48,7 +49,7 @@ Currently-reading books are marked with `(currently reading)` prefix text.
 ## When adding a book
 
 1. Add the `<li>` in the correct year-sorted position within its section.
-2. Include all data attributes (`data-year`, `data-status`, `data-starred` if applicable).
+2. Include all data attributes (`data-year`, `data-status`, `data-added` with today's date, `data-starred` if applicable).
 3. If the book has awards, add `data-caldecott-medal`, `data-caldecott-honor`, and/or `data-nyt-illustrated` attributes, AND add a `title` attribute on the `<cite>` element (e.g. `<cite title="Caldecott Medal 2019">`).
 4. Add an `<item>` to the top of `feed.xml` with the book title, author, a `<guid>` (slug-year), and `<pubDate>` (date you're adding it, RFC 822 format, e.g. `Fri, 28 Feb 2026 00:00:00 +0000`). If the book is starred, also add it to `starred.xml`.
 5. Check if the book was recommended via a GitHub issue (`gh search issues` in the repo). If it was:
