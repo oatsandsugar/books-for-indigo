@@ -56,6 +56,11 @@ Currently-reading books are marked with `(currently reading)` prefix text.
    - Add an inline thank-you in the `<li>`, e.g. `Thanks to <a href="https://github.com/callicles">@callicles</a> for the recommendation!`
    - After committing, close the issue with a comment referencing the commit (e.g. `gh issue close N --comment "Added in <commit-sha>. Thanks for the recommendation!"`)
 
+## When adding or removing a page
+
+- Add/remove a `<url>` entry in `sitemap.xml` with the page URL and today's date as `<lastmod>`.
+- Do not include non-public pages (e.g. `webring-mock.html`) in the sitemap.
+
 ## TODOs
 
 - ~~Add `<details>` collapsible sections~~ (done: easter egg in footer)
@@ -66,7 +71,7 @@ Currently-reading books are marked with `(currently reading)` prefix text.
 - Book / star count on the correlations (stats) page
 - Standardize page footers across all pages
 - Better navigation between pages
-- Auto-discover pages for sitemap.xml
+- ~~Auto-discover pages for sitemap.xml~~ (done: manual, instructions in "When adding or removing a page")
 - SEO best practices audit
 - ~~Index page: sort and filter controls~~ (done: pill buttons for starred/awarded/sort)
 - Index page typography audit: line spacing, indentation, rich data layout, mobile readability

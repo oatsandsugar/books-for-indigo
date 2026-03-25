@@ -3,26 +3,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://readingstori.es/</loc>
-    <lastmod>2026-02-28</lastmod>
+    <lastmod>2026-03-25</lastmod>
   </url>
   <url>
-    <loc>https://readingstori.es/caldecott.html</loc>
-    <lastmod>2026-02-28</lastmod>
+    <loc>https://readingstori.es/about.html</loc>
+    <lastmod>2026-03-25</lastmod>
   </url>
   <url>
-    <loc>https://readingstori.es/cbca.html</loc>
-    <lastmod>2026-02-28</lastmod>
-  </url>
-  <url>
-    <loc>https://readingstori.es/greenaway.html</loc>
-    <lastmod>2026-02-28</lastmod>
-  </url>
-  <url>
-    <loc>https://readingstori.es/newbery.html</loc>
-    <lastmod>2026-03-11</lastmod>
+    <loc>https://readingstori.es/starred.html</loc>
+    <lastmod>2026-03-25</lastmod>
   </url>
   <url>
     <loc>https://readingstori.es/correlations.html</loc>
-    <lastmod>2026-03-11</lastmod>
+    <lastmod>2026-03-25</lastmod>
+  </url>
+  <url>
+    <loc>https://readingstori.es/caldecott.html</loc>
+    <lastmod>2026-03-22</lastmod>
+  </url>
+  <url>
+    <loc>https://readingstori.es/newbery.html</loc>
+    <lastmod>2026-03-24</lastmod>
+  </url>
+  <url>
+    <loc>https://readingstori.es/greenaway.html</loc>
+    <lastmod>2026-03-24</lastmod>
+  </url>
+  <url>
+    <loc>https://readingstori.es/cbca.html</loc>
+    <lastmod>2026-03-24</lastmod>
   </url>
 </urlset>
