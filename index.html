@@ -14,7 +14,21 @@
   <link rel="alternate" type="application/rss+xml" title="Books for Indigo" href="feed.xml">
   <link rel="alternate" type="application/rss+xml" title="Books for Indigo — Starred" href="starred.xml">
   <title>Books for Indigo</title>
-  <style>body { font-family: monospace; line-height: 1.55; } li[data-status] { margin: 0.3em 0; color: #999; } li[data-status] cite { color: #ddd; } @media (prefers-color-scheme: light) { li[data-status] { color: #666; } li[data-status] cite { color: #111; } } details > :not(summary) { margin-left: 1.2em; font-size: x-small; } .new-badge { font-size: x-small; color: #0a0; font-weight: bold; }</style>
+  <style>
+    body { font-family: monospace; line-height: 1.55; }
+    li[data-status] { margin: 0.3em 0; color: #999; }
+    li[data-status] cite { color: #ddd; }
+    @media (prefers-color-scheme: light) { li[data-status] { color: #666; } li[data-status] cite { color: #111; } }
+    details > :not(summary) { margin-left: 1.2em; font-size: x-small; }
+    .new-badge { font-size: x-small; color: #0a0; font-weight: bold; }
+    #controls { margin: 1em 0; font-size: 0.85em; }
+    #controls label { margin-right: 0.3em; }
+    #controls select, #controls button { font-family: monospace; font-size: 0.85em; padding: 0.2em 0.5em; }
+    .filter-row { margin: 0.3em 0; }
+    .filter-row span { opacity: 0.6; margin-right: 0.3em; }
+    li[data-status].hidden { display: none; }
+    .count { opacity: 0.5; font-size: 0.85em; }
+  </style>
 </head>
 <body>
   <header>
@@ -24,10 +38,24 @@
     <p><a href="starred.html">⭐ Starred</a> · <a href="correlations.html">📊 Correlations</a> · <a href="about.html">About</a></p>
     <p><a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a> · Last updated: 24 Mar 2026</p>
   </nav>
+
+  <div id="controls">
+    <div class="filter-row"><span>Filter:</span>
+      <select id="filter-starred"><option value="">Stars: all</option><option value="yes">⭐ Starred</option><option value="no">Unstarred</option></select>
+      <select id="filter-award"><option value="">Awards: all</option></select>
+      <select id="filter-country"><option value="">Country: all</option></select>
+      <select id="filter-section"><option value="">Section: all</option><option value="picture">Picture Books</option><option value="chapter">Chapter Books</option><option value="poetry">Poetry Books</option></select>
+    </div>
+    <div class="filter-row"><span>Sort:</span>
+      <select id="sort-by"><option value="year-asc">Year (oldest first)</option><option value="year-desc">Year (newest first)</option><option value="added-desc">Date added (newest first)</option><option value="added-asc">Date added (oldest first)</option><option value="alpha">Alphabetical</option></select>
+    </div>
+    <div class="filter-row"><span id="result-count"></span></div>
+  </div>
+
   <main>
 
   <h2>Picture Books</h2>
-  <ul>
+  <ul data-section="picture">
     <li data-year="1941" data-added="2026-03-07" data-country="US" data-status="read" data-caldecott-medal="1942"><cite title="Caldecott Medal 1942">Make Way for Ducklings</cite> by <span class="author">Robert McCloskey</span> (1941)</li>
     <li data-year="1962" data-added="2026-02-26" data-country="US" data-starred data-review="Review coming soon." data-status="read" data-caldecott-medal="1963"><cite title="Caldecott Medal 1963">The Snowy Day</cite> by <span class="author">Ezra Jack Keats</span> (1962)</li>
     <li data-year="1963" data-added="2026-02-26" data-country="US" data-starred data-review="Review coming soon." data-status="read" data-caldecott-medal="1964" data-nyt-illustrated="1963"><cite title="Caldecott Medal 1964 · NYT Best Illustrated 1963">Where the Wild Things Are</cite> by <span class="author">Maurice Sendak</span> (1963)</li>
@@ -197,7 +225,7 @@
   </ul>
 
   <h2>Chapter Books</h2>
-  <ul>
+  <ul data-section="chapter">
     <li data-year="170" data-added="2026-02-26" data-country="GR" data-status="reading">(currently reading) <cite>Meditations</cite> by <span class="author">Marcus Aurelius</span> translated by <span class="author">Martin Hammond</span> (c. 170-180 CE, English translation 2006)</li>
     <li data-year="1937" data-added="2026-02-26" data-country="GB" data-status="read"><cite>The Hobbit</cite> by <span class="author">JRR Tolkien</span> (1937)</li>
     <li data-year="1943" data-added="2026-02-26" data-country="FR" data-starred data-review="Review coming soon." data-status="read"><cite>The Little Prince</cite> by <span class="author">Antoine de Saint-Exupéry</span> (1943)</li>
@@ -209,7 +237,7 @@
   </ul>
 
   <h2>Poetry Books</h2>
-  <ul>
+  <ul data-section="poetry">
     <li data-year="-500" data-added="2026-02-26" data-country="CN" data-status="read"><cite>Tao Te Ching</cite> by <span class="author">Lao Tze</span> translated by <span class="author">Ursula K. Le Guin</span> (c. 6th century BCE, English translation 1997)</li>
     <li data-year="1988" data-added="2026-02-26" data-country="US" data-status="read" data-starred data-review="The most beautiful children&apos;s poetry book so far. Poems for two readers, with lines alternating or shared — it made me feel closer to my partner." data-newbery-medal="1989"><cite title="Newbery Medal 1989">Joyful Noise</cite> by <span class="author">Paul Fleischman</span> (1988)</li>
     <li data-year="2002" data-added="2026-02-27" data-country="US" data-status="read"><cite>Lullabies and Poems for Children</cite> by <span class="author">Diana Secker Larson</span> (<span class="role">Editor</span>) (2002)</li>
@@ -245,22 +273,137 @@
     See https://github.com/oatsandsugar/books-for-indigo#extracting-data for more.
   -->
   <script>
-    // Auto-render stars from data-starred attribute
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country'];
+    var allBooks = document.querySelectorAll('li[data-status]');
+
+    // Auto-render stars
     document.querySelectorAll('li[data-starred]').forEach(function(li) {
       li.insertBefore(document.createTextNode('⭐ '), li.firstChild);
     });
-    // Auto-render NEW badges for recently added books
+
+    // Auto-render NEW badges
     var TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
     var now = new Date();
-    document.querySelectorAll('li[data-added]').forEach(function(li) {
-      var added = new Date(li.getAttribute('data-added'));
-      if (now - added < TWO_WEEKS) {
+    allBooks.forEach(function(li) {
+      var added = li.getAttribute('data-added');
+      if (added && now - new Date(added) < TWO_WEEKS) {
         var badge = document.createElement('span');
         badge.className = 'new-badge';
         badge.textContent = ' NEW';
         li.appendChild(badge);
       }
     });
+
+    // Populate award filter from data attributes
+    var awardAttrs = {};
+    allBooks.forEach(function(li) {
+      Array.prototype.forEach.call(li.attributes, function(a) {
+        if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
+        awardAttrs[a.name] = (awardAttrs[a.name] || 0) + 1;
+      });
+    });
+    var awardSelect = document.getElementById('filter-award');
+    awardSelect.innerHTML = '<option value="">Awards: all</option><option value="any">Any award</option><option value="none">No awards</option>';
+    Object.keys(awardAttrs).sort().forEach(function(attr) {
+      var label = attr.replace(/^data-/, '').split('-').map(function(w) {
+        return w.length <= 4 ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+      var opt = document.createElement('option');
+      opt.value = attr;
+      opt.textContent = label + ' (' + awardAttrs[attr] + ')';
+      awardSelect.appendChild(opt);
+    });
+
+    // Populate country filter
+    var countryCounts = {};
+    allBooks.forEach(function(li) {
+      var c = li.getAttribute('data-country');
+      if (c) countryCounts[c] = (countryCounts[c] || 0) + 1;
+    });
+    var countrySelect = document.getElementById('filter-country');
+    Object.keys(countryCounts).sort(function(a, b) { return countryCounts[b] - countryCounts[a]; }).forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c + ' (' + countryCounts[c] + ')';
+      countrySelect.appendChild(opt);
+    });
+
+    // Filter + sort logic
+    function hasAnyAward(li) {
+      return Array.prototype.some.call(li.attributes, function(a) {
+        return a.name.indexOf('data-') === 0 && SKIP_ATTRS.indexOf(a.name) === -1;
+      });
+    }
+
+    function getTitle(li) {
+      var c = li.querySelector('cite');
+      return c ? c.textContent : '';
+    }
+
+    function applyFiltersAndSort() {
+      var starred = document.getElementById('filter-starred').value;
+      var award = document.getElementById('filter-award').value;
+      var country = document.getElementById('filter-country').value;
+      var section = document.getElementById('filter-section').value;
+      var sortBy = document.getElementById('sort-by').value;
+
+      var visible = 0;
+
+      // Filter
+      allBooks.forEach(function(li) {
+        var show = true;
+        if (starred === 'yes' && !li.hasAttribute('data-starred')) show = false;
+        if (starred === 'no' && li.hasAttribute('data-starred')) show = false;
+        if (award === 'any' && !hasAnyAward(li)) show = false;
+        if (award === 'none' && hasAnyAward(li)) show = false;
+        if (award && award !== 'any' && award !== 'none' && !li.hasAttribute(award)) show = false;
+        if (country && li.getAttribute('data-country') !== country) show = false;
+        if (section && li.parentElement.getAttribute('data-section') !== section) show = false;
+
+        if (show) {
+          li.classList.remove('hidden');
+          visible++;
+        } else {
+          li.classList.add('hidden');
+        }
+      });
+
+      // Show/hide sections based on section filter and whether they have visible books
+      document.querySelectorAll('ul[data-section]').forEach(function(ul) {
+        var h2 = ul.previousElementSibling;
+        if (section && ul.getAttribute('data-section') !== section) {
+          ul.style.display = 'none';
+          if (h2) h2.style.display = 'none';
+        } else {
+          ul.style.display = '';
+          if (h2) h2.style.display = '';
+        }
+      });
+
+      // Sort within each section
+      document.querySelectorAll('ul[data-section]').forEach(function(ul) {
+        var items = Array.prototype.slice.call(ul.querySelectorAll('li[data-status]'));
+        items.sort(function(a, b) {
+          if (sortBy === 'year-asc') return parseInt(a.getAttribute('data-year')) - parseInt(b.getAttribute('data-year'));
+          if (sortBy === 'year-desc') return parseInt(b.getAttribute('data-year')) - parseInt(a.getAttribute('data-year'));
+          if (sortBy === 'added-desc') return (b.getAttribute('data-added') || '').localeCompare(a.getAttribute('data-added') || '');
+          if (sortBy === 'added-asc') return (a.getAttribute('data-added') || '').localeCompare(b.getAttribute('data-added') || '');
+          if (sortBy === 'alpha') return getTitle(a).localeCompare(getTitle(b));
+          return 0;
+        });
+        items.forEach(function(li) { ul.appendChild(li); });
+      });
+
+      document.getElementById('result-count').textContent = visible + ' of ' + allBooks.length + ' books';
+    }
+
+    // Bind events
+    ['filter-starred', 'filter-award', 'filter-country', 'filter-section', 'sort-by'].forEach(function(id) {
+      document.getElementById(id).addEventListener('change', applyFiltersAndSort);
+    });
+
+    // Initial count
+    document.getElementById('result-count').textContent = allBooks.length + ' of ' + allBooks.length + ' books';
   </script>
 </body>
 </html>
