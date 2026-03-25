@@ -90,6 +90,11 @@
   <div class="venns" id="venns"></div>
   <div id="book-list"><p><em>Click a region to see books.</em></p></div>
 
+  <h2>Where Books Come From</h2>
+  <p>Country of origin based on author nationality. Hover for details.</p>
+  <div id="geo"></div>
+  <div id="geo-list"></div>
+
   </main>
   <footer>
   <hr>
@@ -98,7 +103,7 @@
 
   <script>
     // Structural attributes to exclude from award auto-discovery
-    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added'];
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country'];
     // Color palette for auto-discovered awards
     var PALETTE = ['#4a90d9', '#e05555', '#50a060', '#b065c0', '#d98a4a', '#5bbcd6', '#d94a7b', '#8a9a5b'];
 
@@ -1047,6 +1052,85 @@
       }
     }
 
+    function buildGeo(doc) {
+      var allBooks = doc.querySelectorAll('li[data-status]');
+      var countries = {};
+      allBooks.forEach(function(li) {
+        var country = li.getAttribute('data-country');
+        if (!country) return;
+        if (!countries[country]) countries[country] = { count: 0, starred: 0, books: [] };
+        countries[country].count++;
+        if (li.hasAttribute('data-starred')) countries[country].starred++;
+        countries[country].books.push(getTitle(li));
+      });
+
+      var sorted = Object.keys(countries).sort(function(a, b) { return countries[b].count - countries[a].count; });
+      if (sorted.length === 0) {
+        document.getElementById('geo').innerHTML = '<p><em>No country data yet.</em></p>';
+        return;
+      }
+
+      // Horizontal bar chart
+      var barH = 22, gap = 4;
+      var maxCount = countries[sorted[0]].count;
+      var W = 500, padLeft = 40;
+      var H = sorted.length * (barH + gap) + 20;
+
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      svg.setAttribute('width', '100%');
+      svg.style.maxWidth = W + 'px';
+      svg.style.display = 'block';
+
+      sorted.forEach(function(code, i) {
+        var c = countries[code];
+        var y = i * (barH + gap);
+        var barW = (c.count / maxCount) * (W - padLeft - 40);
+
+        // Label
+        var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', padLeft - 5); label.setAttribute('y', y + barH * 0.7);
+        label.setAttribute('text-anchor', 'end');
+        label.setAttribute('fill', '#aaa'); label.setAttribute('font-size', '12');
+        label.setAttribute('font-family', 'monospace');
+        label.textContent = code;
+        svg.appendChild(label);
+
+        // Bar
+        var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', padLeft); rect.setAttribute('y', y);
+        rect.setAttribute('width', barW); rect.setAttribute('height', barH);
+        rect.setAttribute('fill', '#4a90d9'); rect.setAttribute('fill-opacity', '0.6');
+        rect.setAttribute('rx', '2');
+        var titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        titleEl.textContent = code + ': ' + c.count + ' books (' + c.starred + ' starred)\n' + c.books.join(', ');
+        rect.appendChild(titleEl);
+        svg.appendChild(rect);
+
+        // Starred portion
+        if (c.starred > 0) {
+          var starW = (c.starred / maxCount) * (W - padLeft - 40);
+          var starRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          starRect.setAttribute('x', padLeft); starRect.setAttribute('y', y);
+          starRect.setAttribute('width', starW); starRect.setAttribute('height', barH);
+          starRect.setAttribute('fill', STAR_COLOR); starRect.setAttribute('fill-opacity', '0.7');
+          starRect.setAttribute('rx', '2');
+          starRect.appendChild(titleEl.cloneNode(true));
+          svg.appendChild(starRect);
+        }
+
+        // Count
+        var countLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        countLabel.setAttribute('x', padLeft + barW + 5); countLabel.setAttribute('y', y + barH * 0.7);
+        countLabel.setAttribute('fill', '#888'); countLabel.setAttribute('font-size', '11');
+        countLabel.setAttribute('font-family', 'monospace');
+        countLabel.textContent = c.count;
+        svg.appendChild(countLabel);
+      });
+
+      document.getElementById('geo').appendChild(svg);
+    }
+
     fetch('index.html')
       .then(function(r) { return r.text(); })
       .then(function(html) {
@@ -1065,6 +1149,7 @@
 
         buildHistogram(doc);
         buildMongoDiagram(doc);
+        buildGeo(doc);
 
         // Count totals once
         var totalBooks = allBooks.length;

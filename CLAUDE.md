@@ -68,6 +68,7 @@ Currently-reading books are marked with `(currently reading)` prefix text.
 - Better navigation between pages
 - Auto-discover pages for sitemap.xml
 - SEO best practices audit
-- Index page: sort (by year, by date added, alphabetical) and filter controls (starred, by decade, currently reading, by award, new)
+- ~~Index page: sort and filter controls~~ (done: pill buttons for starred/awarded/sort)
+- Index page typography audit: line spacing, indentation, rich data layout, mobile readability
 - Favorite libraries section
 - More awards (Newbery, etc.) — Greenaway and CBCA checklists already added
