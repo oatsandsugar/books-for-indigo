@@ -16,6 +16,7 @@
   <title>Books for Indigo</title>
   <style>
     body { font-family: monospace; line-height: 1.55; }
+    ul { padding-left: 1.5em; }
     li[data-status] { margin: 0.3em 0; color: #999; }
     li[data-status] cite { color: #ddd; }
     @media (prefers-color-scheme: light) { li[data-status] { color: #666; } li[data-status] cite { color: #111; } }
@@ -34,6 +35,12 @@
     .pill.sort-pill.on { border-color: #e05555; color: #e05555; }
     #result-count { font-size: 0.8em; opacity: 0.5; margin: 0.3em 0; }
     li[data-status].hidden { display: none; }
+    .country-chip { font-size: 0.7em; border: 1px solid; border-radius: 0.3em; padding: 0 0.3em; margin-left: 0.4em; opacity: 0.4; vertical-align: middle; display: none; }
+    body.show-rich .country-chip { display: inline; }
+    .rich-data { font-size: 0.8em; opacity: 0.5; display: none; }
+    .review-line { font-style: italic; margin-left: 1.2em; }
+    body.show-rich .rich-data { display: inline; }
+    body.show-rich .review-line { display: block; }
     @media (prefers-color-scheme: light) {
       .pill.star-pill.on { border-color: #a07800; color: #a07800; }
       .pill.award-pill.on { border-color: #2a60a9; color: #2a60a9; }
@@ -56,6 +63,7 @@
       <span class="filter-label">show</span>
       <button class="pill star-pill" data-filter="starred" data-value="yes">⭐ starred</button>
       <button class="pill award-pill" data-filter="award" data-value="any">🏅 awarded</button>
+      <button class="pill" id="toggle-rich">📋 details</button>
       <span id="result-count"></span>
     </div>
     <div class="filter-row">
@@ -300,6 +308,39 @@
     var TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
     var now = new Date();
     allBooks.forEach(function(li) {
+      // Country chip (always visible)
+      var country = li.getAttribute('data-country');
+      if (country) {
+        var chip = document.createElement('span');
+        chip.className = 'country-chip';
+        chip.textContent = country;
+        li.appendChild(chip);
+      }
+      // Rich data (hidden until details toggled)
+      var awards = [];
+      Array.prototype.forEach.call(li.attributes, function(a) {
+        if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
+        var name = a.name.replace(/^data-/, '').split('-').map(function(w) {
+          return w.length <= 4 ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1);
+        }).join(' ');
+        awards.push(name + (a.value ? ' ' + a.value : ''));
+      });
+      var review = li.getAttribute('data-review');
+      var hasReview = review && review !== 'Review coming soon.';
+      var rich = [];
+      if (awards.length > 0) {
+        var span = document.createElement('span');
+        span.className = 'rich-data';
+        span.textContent = ' \u2014 ' + awards.join(' \u00b7 ');
+        li.appendChild(span);
+      }
+      if (hasReview) {
+        var rev = document.createElement('div');
+        rev.className = 'rich-data review-line';
+        rev.textContent = '\u201c' + review + '\u201d';
+        li.appendChild(rev);
+      }
+      // NEW badge
       var added = li.getAttribute('data-added');
       if (added && now - new Date(added) < TWO_WEEKS) {
         var badge = document.createElement('span');
@@ -395,6 +436,13 @@
         currentSort = btn.getAttribute('data-sort');
         apply();
       });
+    });
+
+    // Rich data toggle
+    var richBtn = document.getElementById('toggle-rich');
+    richBtn.addEventListener('click', function() {
+      document.body.classList.toggle('show-rich');
+      richBtn.classList.toggle('on');
     });
 
     // Initial count
