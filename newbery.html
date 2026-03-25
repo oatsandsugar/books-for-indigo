@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="Tracking progress through all 105 Newbery Medal winners (1922–2026). A visual checklist for Books for Indigo.">
+  <link rel="canonical" href="https://readingstori.es/newbery.html">
+  <meta property="og:title" content="Newbery Medal Checklist — Books for Indigo">
+  <meta property="og:description" content="Tracking progress through all 105 Newbery Medal winners (1922–2026). A visual checklist for Books for Indigo.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://readingstori.es/newbery.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏅</text></svg>">
   <title>Newbery Medal Checklist — Books for Indigo</title>
   <style>
@@ -48,8 +53,13 @@
   </style>
 </head>
 <body>
-  <h1>Newbery Medal Checklist</h1>
-  <p><a href="index.html">&larr; Books for Indigo</a></p>
+  <header>
+    <h1>Newbery Medal Checklist</h1>
+  </header>
+  <nav>
+    <p><a href="index.html">&larr; Books for Indigo</a></p>
+  </nav>
+  <main>
   <p>The <a href="https://www.ala.org/alsc/awardsgrants/bookmedia/newbery">Newbery Medal</a> is awarded annually to the author of the most distinguished contribution to American literature for children. 105 medals have been given since 1922.</p>
   <p id="progress"><strong>Loading...</strong></p>
   <noscript><p><small><em>JavaScript is needed to show read/starred status from the <a href="index.html">book list</a>.</em></small></p></noscript>
@@ -369,8 +379,11 @@
     <li class="list-unread" data-year="1922"><span class="cb">☐</span> <cite>The Story of Mankind</cite> (1922) — Hendrik Willem Van Loon<span class="star"></span></li>
   </ul>
 
+  </main>
+  <footer>
   <hr>
   <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+  </footer>
 
   <script>
     fetch('index.html')

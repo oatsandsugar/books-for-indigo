@@ -52,41 +52,72 @@
   </footer>
 
   <script>
-    var PALETTE = ['#e6194b','#3cb44b','#4363d8','#f58231','#911eb4','#42d4f4','#f032e6','#bfef45','#fabed4','#469990'];
+    var PALETTE = ['#4a90d9', '#e05555', '#50a060', '#b065c0', '#d98a4a', '#5bbcd6', '#d94a7b', '#8a9a5b'];
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended'];
 
     function prettyLabel(attr) {
-      var name = attr.replace('data-', '').replace(/-/g, ' ');
-      var words = name.split(' ');
-      return words.map(function(w) {
+      var name = attr.replace(/^data-/, '');
+      return name.split('-').map(function(w) {
         if (w.length <= 4) return w.toUpperCase();
         return w.charAt(0).toUpperCase() + w.slice(1);
       }).join(' ');
     }
 
+    function awardFamily(attr) {
+      return attr.replace(/^data-/, '').replace(/-(medal|honor|book)$/, '');
+    }
+
     function discoverAwards(allBooks) {
-      var found = {};
+      var attrCounts = {};
       allBooks.forEach(function(li) {
         Array.prototype.forEach.call(li.attributes, function(a) {
-          if (/^data-(caldecott|newbery|nyt|greenaway|cbca)/.test(a.name)) {
-            var base = a.name.replace(/-\d+$/, '');
-            if (!found[base]) found[base] = { attr: base, label: prettyLabel(base), count: 0 };
-            found[base].count++;
-          }
+          if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
+          if (!attrCounts[a.name]) attrCounts[a.name] = 0;
+          attrCounts[a.name]++;
         });
       });
-      var awards = Object.keys(found).map(function(k) { return found[k]; });
-      awards.sort(function(a, b) { return b.count - a.count; });
-      return awards.map(function(a, i) {
-        return {
-          label: a.label,
-          color: PALETTE[i % PALETTE.length],
-          test: function(li) {
-            return Array.prototype.some.call(li.attributes, function(attr) {
-              return attr.name.indexOf(a.attr) === 0;
+
+      var families = {};
+      Object.keys(attrCounts).forEach(function(attr) {
+        var family = awardFamily(attr);
+        if (!families[family]) families[family] = [];
+        families[family].push(attr);
+      });
+
+      var result = [];
+      var colorIdx = 0;
+
+      Object.keys(families).forEach(function(family) {
+        var attrs = families[family];
+        var familyColor = PALETTE[colorIdx % PALETTE.length];
+        colorIdx++;
+
+        if (attrs.length > 1) {
+          result.push({
+            label: prettyLabel('data-' + family),
+            color: familyColor,
+            test: function(li) {
+              return attrs.some(function(a) { return li.hasAttribute(a); });
+            }
+          });
+          var medalAttr = attrs.filter(function(a) { return /-medal$/.test(a); })[0];
+          if (medalAttr) {
+            result.push({
+              label: prettyLabel(medalAttr),
+              color: familyColor,
+              test: function(li) { return li.hasAttribute(medalAttr); }
             });
           }
-        };
+        } else {
+          result.push({
+            label: prettyLabel(attrs[0]),
+            color: familyColor,
+            test: function(li) { return li.hasAttribute(attrs[0]); }
+          });
+        }
       });
+
+      return result;
     }
 
     fetch('index.html')
