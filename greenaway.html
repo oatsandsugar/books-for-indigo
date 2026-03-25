@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="Tracking progress through Kate Greenaway Medal winners (1956–2025). A visual checklist for Books for Indigo.">
+  <link rel="canonical" href="https://readingstori.es/greenaway.html">
+  <meta property="og:title" content="Kate Greenaway Medal Checklist — Books for Indigo">
+  <meta property="og:description" content="Tracking progress through Kate Greenaway Medal winners (1956–2025). A visual checklist for Books for Indigo.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://readingstori.es/greenaway.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏅</text></svg>">
   <title>Kate Greenaway Medal Checklist — Books for Indigo</title>
   <style>
@@ -48,8 +53,13 @@
   </style>
 </head>
 <body>
-  <h1>Kate Greenaway Medal Checklist</h1>
-  <p><a href="index.html">&larr; Books for Indigo</a></p>
+  <header>
+    <h1>Kate Greenaway Medal Checklist</h1>
+  </header>
+  <nav>
+    <p><a href="index.html">&larr; Books for Indigo</a></p>
+  </nav>
+  <main>
   <p>The <a href="https://carnegies.co.uk/">Kate Greenaway Medal</a> (renamed Carnegie Medal for Illustration in 2022) is awarded for distinguished illustration in a UK children's book. 68 medals have been given since 1955.</p>
   <p id="progress"><strong>Loading...</strong></p>
   <noscript><p><small><em>JavaScript is needed to show read/starred status from the <a href="index.html">book list</a>.</em></small></p></noscript>
@@ -286,8 +296,11 @@
     <li class="list-unread" data-year="1956"><span class="cb">☐</span> <cite>Tim All Alone</cite> (1956) — Edward Ardizzone<span class="star"></span></li>
   </ul>
 
+  </main>
+  <footer>
   <hr>
   <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+  </footer>
 
   <script>
     fetch('index.html')

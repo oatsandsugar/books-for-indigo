@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Starred favourites from Books for Indigo, with mini-reviews.">
+  <link rel="canonical" href="https://readingstori.es/starred.html">
+  <meta property="og:title" content="Starred — Books for Indigo">
+  <meta property="og:description" content="Starred favourites from Books for Indigo, with mini-reviews.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://readingstori.es/starred.html">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <title>Starred — Books for Indigo</title>
+  <style>
+    body { font-family: monospace; max-width: 70ch; margin: 2em auto; padding: 0 1em; }
+    .book { margin: 1.2em 0; transition: opacity 0.15s; }
+    .book.hidden { display: none; }
+    .book-title cite { font-style: normal; font-weight: bold; }
+    .book-author { font-size: 0.85em; opacity: 0.7; }
+    .book-awards { font-size: 0.8em; opacity: 0.6; }
+    .book-review { font-size: 0.9em; font-style: italic; }
+    .book-review.placeholder { opacity: 0.4; }
+    .count { opacity: 0.7; }
+    #loading { opacity: 0.5; }
+    #controls { display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center; margin: 0.8em 0; }
+    .set-btn { font-family: monospace; font-size: 0.85em; padding: 0.3em 0.8em; border: 2px solid; border-radius: 3px; cursor: pointer; background: transparent; color: inherit; opacity: 0.4; transition: all 0.15s; }
+    .set-btn:hover { opacity: 0.7; }
+    .set-btn:focus-visible { outline: 2px solid; outline-offset: 2px; opacity: 0.7; }
+    .set-btn.include { opacity: 1; font-weight: bold; }
+    .set-btn.exclude { opacity: 1; text-decoration: line-through; }
+    #filter-status { text-align: center; font-size: 0.85em; opacity: 0.7; min-height: 1.5em; margin: 0.3em 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Starred Books</h1>
+    <p>Our favourites, with a line about why.</p>
+  </header>
+  <nav>
+    <p><a href="index.html">&larr; Books for Indigo</a></p>
+  </nav>
+  <main>
+    <div id="controls"></div>
+    <div id="filter-status"></div>
+    <p id="loading">Loading...</p>
+    <div id="starred-list"></div>
+  </main>
+  <footer>
+    <hr>
+    <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+  </footer>
+
+  <script>
+    var PALETTE = ['#4a90d9', '#e05555', '#50a060', '#b065c0', '#d98a4a', '#5bbcd6', '#d94a7b', '#8a9a5b'];
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added'];
+
+    function prettyLabel(attr) {
+      var name = attr.replace(/^data-/, '');
+      return name.split('-').map(function(w) {
+        if (w.length <= 4) return w.toUpperCase();
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+    }
+
+    function awardFamily(attr) {
+      return attr.replace(/^data-/, '').replace(/-(medal|honor|book)$/, '');
+    }
+
+    function discoverAwards(allBooks) {
+      var attrCounts = {};
+      allBooks.forEach(function(li) {
+        Array.prototype.forEach.call(li.attributes, function(a) {
+          if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
+          if (!attrCounts[a.name]) attrCounts[a.name] = 0;
+          attrCounts[a.name]++;
+        });
+      });
+
+      var families = {};
+      Object.keys(attrCounts).forEach(function(attr) {
+        var family = awardFamily(attr);
+        if (!families[family]) families[family] = [];
+        families[family].push(attr);
+      });
+
+      var result = [];
+      var colorIdx = 0;
+
+      Object.keys(families).forEach(function(family) {
+        var attrs = families[family];
+        var familyColor = PALETTE[colorIdx % PALETTE.length];
+        colorIdx++;
+
+        if (attrs.length > 1) {
+          result.push({
+            label: prettyLabel('data-' + family),
+            color: familyColor,
+            test: function(li) {
+              return attrs.some(function(a) { return li.hasAttribute(a); });
+            }
+          });
+          var medalAttr = attrs.filter(function(a) { return /-medal$/.test(a); })[0];
+          if (medalAttr) {
+            result.push({
+              label: prettyLabel(medalAttr),
+              color: familyColor,
+              test: function(li) { return li.hasAttribute(medalAttr); }
+            });
+          }
+        } else {
+          result.push({
+            label: prettyLabel(attrs[0]),
+            color: familyColor,
+            test: function(li) { return li.hasAttribute(attrs[0]); }
+          });
+        }
+      });
+
+      return result;
+    }
+
+    fetch('index.html')
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var allBooks = doc.querySelectorAll('li[data-status]');
+        var starred = doc.querySelectorAll('li[data-starred]');
+        var container = document.getElementById('starred-list');
+        var loading = document.getElementById('loading');
+
+        if (starred.length === 0) {
+          loading.textContent = 'No starred books found.';
+          return;
+        }
+
+        loading.remove();
+
+        // Auto-discover award sets from ALL books (for consistent colours with correlations page)
+        var SETS = discoverAwards(allBooks);
+
+        // Store book elements and their source li for filtering
+        var bookElements = [];
+
+        // Group by section
+        var sections = {};
+        var sectionOrder = [];
+        starred.forEach(function(li) {
+          var heading = li.closest('ul');
+          var h2 = heading ? heading.previousElementSibling : null;
+          var section = (h2 && h2.tagName === 'H2') ? h2.textContent : 'Other';
+          if (!sections[section]) { sections[section] = []; sectionOrder.push(section); }
+          sections[section].push(li);
+        });
+
+        var totalCount = 0;
+        var sectionHeaders = {};
+
+        sectionOrder.forEach(function(section) {
+          var books = sections[section];
+          totalCount += books.length;
+
+          var h2 = document.createElement('h2');
+          h2.textContent = section;
+          container.appendChild(h2);
+          sectionHeaders[section] = h2;
+
+          books.forEach(function(li) {
+            var cite = li.querySelector('cite');
+            var title = cite ? cite.textContent : '?';
+            var titleAttr = cite ? cite.getAttribute('title') : '';
+            var year = li.getAttribute('data-year');
+            var review = li.getAttribute('data-review') || '';
+
+            var authors = [];
+            li.querySelectorAll('.author').forEach(function(a) {
+              var role = a.nextElementSibling;
+              var roleText = (role && role.classList.contains('role')) ? ' (' + role.textContent + ')' : '';
+              authors.push(a.textContent + roleText);
+            });
+            if (authors.length === 0) {
+              var text = li.textContent;
+              var byMatch = text.match(/by\s+(.+?)\s*\(\d/);
+              if (byMatch) authors.push(byMatch[1].trim());
+            }
+
+            var div = document.createElement('div');
+            div.className = 'book';
+
+            var titleLine = document.createElement('div');
+            titleLine.className = 'book-title';
+            titleLine.innerHTML = '&#11088; <cite>' + title + '</cite>' + (year ? ' (' + year + ')' : '');
+            div.appendChild(titleLine);
+
+            if (authors.length > 0) {
+              var authorLine = document.createElement('div');
+              authorLine.className = 'book-author';
+              authorLine.textContent = authors.join(', ');
+              div.appendChild(authorLine);
+            }
+
+            if (titleAttr) {
+              var awardsLine = document.createElement('div');
+              awardsLine.className = 'book-awards';
+              awardsLine.textContent = titleAttr;
+              div.appendChild(awardsLine);
+            }
+
+            if (review) {
+              var rev = document.createElement('div');
+              rev.className = 'book-review';
+              if (review === 'Review coming soon.') rev.classList.add('placeholder');
+              rev.textContent = review;
+              div.appendChild(rev);
+            }
+
+            container.appendChild(div);
+            bookElements.push({ el: div, li: li, section: section });
+          });
+        });
+
+        // Add count to header
+        var header = document.querySelector('header p');
+        header.innerHTML += ' <span class="count">(' + totalCount + ' books)</span>';
+
+        // --- Filter buttons ---
+        var controls = document.getElementById('controls');
+        var states = SETS.map(function() { return 0; });
+
+        var buttons = SETS.map(function(s, i) {
+          var btn = document.createElement('button');
+          btn.className = 'set-btn';
+          btn.style.borderColor = s.color;
+          btn.textContent = s.label;
+          btn.addEventListener('click', function() {
+            states[i] = (states[i] + 1) % 3;
+            updateFilter();
+          });
+          controls.appendChild(btn);
+          return btn;
+        });
+
+        // Add a "No awards" button
+        var noAwardState = 0;
+        var noAwardBtn = document.createElement('button');
+        noAwardBtn.className = 'set-btn';
+        noAwardBtn.style.borderColor = '#888';
+        noAwardBtn.textContent = 'No Awards';
+        noAwardBtn.addEventListener('click', function() {
+          noAwardState = (noAwardState + 1) % 3;
+          updateFilter();
+        });
+        controls.appendChild(noAwardBtn);
+
+        function hasAnyAward(li) {
+          return SETS.some(function(s) { return s.test(li); });
+        }
+
+        function updateFilter() {
+          var includes = [], excludes = [];
+          SETS.forEach(function(s, i) {
+            buttons[i].className = 'set-btn' + (states[i] === 1 ? ' include' : states[i] === 2 ? ' exclude' : '');
+            buttons[i].style.background = states[i] === 1 ? s.color + '33' : states[i] === 2 ? '#3332' : 'transparent';
+            if (states[i] === 1) includes.push(i);
+            if (states[i] === 2) excludes.push(i);
+          });
+
+          noAwardBtn.className = 'set-btn' + (noAwardState === 1 ? ' include' : noAwardState === 2 ? ' exclude' : '');
+          noAwardBtn.style.background = noAwardState === 1 ? '#88888833' : noAwardState === 2 ? '#3332' : 'transparent';
+
+          var hasSelection = includes.length > 0 || excludes.length > 0 || noAwardState > 0;
+          var visibleCount = 0;
+          var visibleSections = {};
+
+          bookElements.forEach(function(b) {
+            if (!hasSelection) {
+              b.el.classList.remove('hidden');
+              visibleCount++;
+              visibleSections[b.section] = true;
+              return;
+            }
+
+            var match = true;
+            includes.forEach(function(i) { if (!SETS[i].test(b.li)) match = false; });
+            excludes.forEach(function(i) { if (SETS[i].test(b.li)) match = false; });
+            if (noAwardState === 1 && hasAnyAward(b.li)) match = false;
+            if (noAwardState === 2 && !hasAnyAward(b.li)) match = false;
+
+            if (match) {
+              b.el.classList.remove('hidden');
+              visibleCount++;
+              visibleSections[b.section] = true;
+            } else {
+              b.el.classList.add('hidden');
+            }
+          });
+
+          // Hide/show section headers
+          sectionOrder.forEach(function(section) {
+            sectionHeaders[section].style.display = visibleSections[section] ? '' : 'none';
+          });
+
+          var statusEl = document.getElementById('filter-status');
+          if (!hasSelection) {
+            statusEl.textContent = '';
+          } else {
+            // Build descriptive filter string
+            var parts = [];
+            var incLabels = includes.map(function(i) { return SETS[i].label; });
+            var excLabels = excludes.map(function(i) { return SETS[i].label; });
+            if (noAwardState === 1) incLabels.push('No Awards');
+            if (noAwardState === 2) excLabels.push('No Awards');
+
+            var desc = visibleCount + ' of ' + totalCount + ' starred books';
+            if (incLabels.length > 0) desc += ' are ' + incLabels.join(' + ');
+            if (excLabels.length > 0) desc += ' but not ' + excLabels.join(' or ');
+
+            statusEl.textContent = desc;
+          }
+        }
+      });
+  </script>
+</body>
+</html>

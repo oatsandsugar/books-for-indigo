@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="Venn diagrams of awards and starred favourites from Books for Indigo.">
+  <link rel="canonical" href="https://readingstori.es/correlations.html">
+  <meta property="og:title" content="Correlations — Books for Indigo">
+  <meta property="og:description" content="Venn diagrams of awards and starred favourites from Books for Indigo.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://readingstori.es/correlations.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <title>Correlations — Books for Indigo</title>
   <style>
@@ -45,6 +50,7 @@
     #mongo-controls { display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center; margin: 0.8em 0; }
     .set-btn { font-family: monospace; font-size: 0.85em; padding: 0.3em 0.8em; border: 2px solid; border-radius: 3px; cursor: pointer; background: transparent; color: inherit; opacity: 0.4; transition: all 0.15s; }
     .set-btn:hover { opacity: 0.7; }
+    .set-btn:focus-visible { outline: 2px solid; outline-offset: 2px; opacity: 0.7; }
     .set-btn.include { opacity: 1; font-weight: bold; }
     .set-btn.exclude { opacity: 1; text-decoration: line-through; }
     #mongo-query { text-align: center; font-size: 0.85em; margin: 0.5em 0; min-height: 1.5em; opacity: 0.7; }
@@ -56,18 +62,23 @@
   </style>
 </head>
 <body>
-  <h1>Correlations</h1>
-  <p><a href="index.html">&larr; Books for Indigo</a></p>
+  <header>
+    <h1>Correlations</h1>
+  </header>
+  <nav>
+    <p><a href="index.html">&larr; Books for Indigo</a></p>
+  </nav>
+  <main>
+
+  <div id="mongo-controls"></div>
+  <div id="mongo-query"></div>
+
   <h2>Year &cap; Stars</h2>
   <div id="histogram"></div>
-
   <div id="hist-stats"></div>
 
   <h2>All Awards &cap; Stars</h2>
   <p>Click to include, click again to exclude, click again to reset. Circle areas proportional to set sizes.</p>
-
-  <div id="mongo-controls"></div>
-  <div id="mongo-query"></div>
   <div id="mongo"></div>
   <div id="mongo-book-list"></div>
 
@@ -79,52 +90,96 @@
   <div class="venns" id="venns"></div>
   <div id="book-list"><p><em>Click a region to see books.</em></p></div>
 
+  </main>
+  <footer>
   <hr>
   <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+  </footer>
 
   <script>
     // Structural attributes to exclude from award auto-discovery
-    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred'];
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added'];
     // Color palette for auto-discovered awards
     var PALETTE = ['#4a90d9', '#e05555', '#50a060', '#b065c0', '#d98a4a', '#5bbcd6', '#d94a7b', '#8a9a5b'];
 
-    // Prettify attribute names: data-caldecott-medal -> Caldecott, data-nyt-illustrated -> NYT Illustrated
+    // Prettify attribute names
     function prettyLabel(attr) {
-      var name = attr.replace(/^data-/, '').replace(/-medal$/, '').replace(/-honor$/, '').replace(/-book$/, '');
+      var name = attr.replace(/^data-/, '');
       return name.split('-').map(function(w) {
         if (w.length <= 4) return w.toUpperCase();
         return w.charAt(0).toUpperCase() + w.slice(1);
       }).join(' ');
     }
 
-    // Group related attributes (e.g. caldecott-medal + caldecott-honor -> one "Caldecott" award)
-    function awardKey(attr) {
+    // Group key: strips data- prefix and suffixes like -medal, -honor, -book
+    function awardFamily(attr) {
       return attr.replace(/^data-/, '').replace(/-(medal|honor|book)$/, '');
     }
 
     function discoverAwards(allBooks) {
-      var found = {}; // key -> [attr1, attr2, ...]
+      // Step 1: discover individual attributes
+      var attrCounts = {};
       allBooks.forEach(function(li) {
         Array.prototype.forEach.call(li.attributes, function(a) {
           if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
-          var key = awardKey(a.name);
-          if (!found[key]) found[key] = [];
-          if (found[key].indexOf(a.name) === -1) found[key].push(a.name);
+          if (!attrCounts[a.name]) attrCounts[a.name] = 0;
+          attrCounts[a.name]++;
         });
       });
 
-      var keys = Object.keys(found);
-      return keys.map(function(key, i) {
-        var attrs = found[key];
-        return {
-          key: key,
-          label: prettyLabel(attrs[0]),
-          color: PALETTE[i % PALETTE.length],
-          test: function(li) {
-            return attrs.some(function(a) { return li.hasAttribute(a); });
-          }
-        };
+      // Step 2: group into families
+      var families = {};
+      Object.keys(attrCounts).forEach(function(attr) {
+        var family = awardFamily(attr);
+        if (!families[family]) families[family] = [];
+        families[family].push(attr);
       });
+
+      var result = [];
+      var colorIdx = 0;
+
+      Object.keys(families).forEach(function(family) {
+        var attrs = families[family];
+        var familyColor = PALETTE[colorIdx % PALETTE.length];
+        colorIdx++;
+
+        if (attrs.length > 1) {
+          // Multiple variants (e.g. caldecott-medal + caldecott-honor)
+          // Add the superset (all) with descriptive label
+          var superLabel = prettyLabel('data-' + family) + ' Winners & Honorees';
+          result.push({
+            key: family,
+            label: superLabel,
+            color: familyColor,
+            isSuperset: true,
+            memberAttrs: attrs,
+            test: function(li) {
+              return attrs.some(function(a) { return li.hasAttribute(a); });
+            }
+          });
+          // Add only the medal subset (honor is implied by the ring)
+          var medalAttr = attrs.filter(function(a) { return /-medal$/.test(a); })[0];
+          if (medalAttr) {
+            result.push({
+              key: medalAttr.replace(/^data-/, ''),
+              label: prettyLabel(medalAttr),
+              color: familyColor,
+              isSubset: true,
+              test: function(li) { return li.hasAttribute(medalAttr); }
+            });
+          }
+        } else {
+          // Single attribute, no family grouping needed
+          result.push({
+            key: attrs[0].replace(/^data-/, ''),
+            label: prettyLabel(attrs[0]),
+            color: familyColor,
+            test: function(li) { return li.hasAttribute(attrs[0]); }
+          });
+        }
+      });
+
+      return result;
     }
 
     var AWARDS = []; // populated after fetch
@@ -170,6 +225,21 @@
       return c ? c.textContent : '?';
     }
 
+    // Get specific award labels for a book (e.g. "Medal 1963", "Honor 1968")
+    function getAwardBadges(li) {
+      var badges = [];
+      Array.prototype.forEach.call(li.attributes, function(a) {
+        if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
+        var name = a.name.replace(/^data-/, '').split('-').map(function(w) {
+          if (w.length <= 4) return w.toUpperCase();
+          return w.charAt(0).toUpperCase() + w.slice(1);
+        }).join(' ');
+        var val = a.value ? ' ' + a.value : '';
+        badges.push(name + val);
+      });
+      return badges;
+    }
+
     function showList(label, items) {
       var el = document.getElementById('book-list');
       if (items.length === 0) {
@@ -178,7 +248,9 @@
       }
       var html = '<h3>' + label + ' (' + items.length + ')</h3><ul>';
       items.forEach(function(b) {
-        html += '<li><cite>' + b.title + '</cite> (' + b.year + ')</li>';
+        html += '<li><cite>' + b.title + '</cite> (' + b.year + ')';
+        if (b.badges && b.badges.length > 0) html += ' <small style="opacity:0.6">' + b.badges.join(' · ') + '</small>';
+        html += '</li>';
       });
       html += '</ul>';
       el.innerHTML = html;
@@ -715,17 +787,36 @@
         circle.setAttribute('fill-opacity', '0.2');
         circle.setAttribute('stroke', s.color);
         circle.setAttribute('stroke-width', '1.5');
+        if (s.isSubset) circle.setAttribute('stroke-dasharray', '6 3');
         circle.setAttribute('pointer-events', 'none');
         circle.setAttribute('data-set-index', i);
         svg.appendChild(circle);
         svgCircles[i] = circle;
       });
 
+      // Detect which circles are supersets (fully contain a smaller circle)
+      var labelOffsetY = {};
+      for (var i = 0; i < n; i++) {
+        labelOffsetY[i] = 0;
+        for (var j = 0; j < n; j++) {
+          if (i === j) continue;
+          // Check if j is fully inside i (subset)
+          var dx = pos[j].x - pos[i].x;
+          var dy = pos[j].y - pos[i].y;
+          var d = Math.sqrt(dx * dx + dy * dy);
+          if (d + radii[j] <= radii[i] + 2) {
+            // j is inside i — push i's label toward top of its circle
+            labelOffsetY[i] = -radii[i] * 0.55;
+            break;
+          }
+        }
+      }
+
       // Labels on top
       order.slice().reverse().forEach(function(i) {
         var s = SETS[i];
         var px = pos[i].x + offsetX;
-        var py = pos[i].y + offsetY;
+        var py = pos[i].y + offsetY + labelOffsetY[i];
         var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text.setAttribute('x', px);
         text.setAttribute('y', py);
@@ -802,7 +893,7 @@
 
         if (!hasSelection) {
           // Reset circle opacity
-          SETS.forEach(function(_, i) { svgCircles[i].setAttribute('fill-opacity', '0.2'); svgCircles[i].setAttribute('stroke-opacity', '1'); svgCircles[i].setAttribute('stroke-dasharray', 'none'); });
+          SETS.forEach(function(s, i) { svgCircles[i].setAttribute('fill-opacity', '0.2'); svgCircles[i].setAttribute('stroke-opacity', '1'); svgCircles[i].setAttribute('stroke-dasharray', s.isSubset ? '6 3' : 'none'); });
           // Reset histogram — restore original positions
           var resetCols = {};
           HIST_SQUARES.forEach(function(hs) {
@@ -839,7 +930,7 @@
         SETS.forEach(function(_, i) {
           svgCircles[i].setAttribute('fill-opacity', '0.08');
           svgCircles[i].setAttribute('stroke-opacity', states[i] === 2 ? '0.15' : '0.3');
-          svgCircles[i].setAttribute('stroke-dasharray', states[i] === 2 ? '4 3' : 'none');
+          svgCircles[i].setAttribute('stroke-dasharray', states[i] === 2 ? '4 3' : (SETS[i].isSubset ? '6 3' : 'none'));
         });
 
         // Spotlight: dark overlay with the selected region cut out via mask
@@ -918,13 +1009,9 @@
         overlay.setAttribute('mask', 'url(#' + spotMaskId + ')');
         highlightGroup.appendChild(overlay);
 
-        // Build query label
-        var parts = includes.map(function(i) { return SETS[i].label; });
-        var label = parts.join(' \u2229 ');
-        if (excludes.length > 0) {
-          label += (label ? ' ' : '') + '\\ ' + excludes.map(function(i) { return SETS[i].label; }).join(', ');
-        }
-        queryEl.textContent = label;
+        // Build query label — readable format
+        var incLabels = includes.map(function(i) { return SETS[i].label; });
+        var excLabels = excludes.map(function(i) { return SETS[i].label; });
 
         // Filter books
         var items = [];
@@ -936,15 +1023,24 @@
           excludes.forEach(function(i) {
             if (SETS[i].test(li)) ok = false;
           });
-          if (ok) items.push({ title: getTitle(li), year: li.getAttribute('data-year') });
+          if (ok) items.push({ title: getTitle(li), year: li.getAttribute('data-year'), badges: getAwardBadges(li) });
         });
 
-        var html = '<h3>' + label + ' (' + items.length + ')</h3>';
+        var label = items.length + ' of ' + allBooks.length + ' books';
+        if (incLabels.length > 0) label += ' are ' + incLabels.join(' + ');
+        if (excLabels.length > 0) label += ' but not ' + excLabels.join(' or ');
+        queryEl.textContent = label;
+
+        var html = '<h3>' + label + '</h3>';
         if (items.length === 0) {
           html += '<p><em>None</em></p>';
         } else {
           html += '<ul>';
-          items.forEach(function(b) { html += '<li><cite>' + b.title + '</cite> (' + b.year + ')</li>'; });
+          items.forEach(function(b) {
+            html += '<li><cite>' + b.title + '</cite> (' + b.year + ')';
+            if (b.badges.length > 0) html += ' <small style="opacity:0.6">' + b.badges.join(' · ') + '</small>';
+            html += '</li>';
+          });
           html += '</ul>';
         }
         listEl.innerHTML = html;
@@ -986,7 +1082,7 @@
             var isStarred = li.hasAttribute('data-starred');
             if (!hasAward && !isStarred) return;
 
-            var entry = { title: getTitle(li), year: li.getAttribute('data-year') };
+            var entry = { title: getTitle(li), year: li.getAttribute('data-year'), badges: getAwardBadges(li) };
             if (hasAward && isStarred) sets.both.push(entry);
             else if (hasAward) sets.awardOnly.push(entry);
             else sets.starsOnly.push(entry);
