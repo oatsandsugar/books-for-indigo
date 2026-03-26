@@ -53,6 +53,13 @@
     #mongo-book-list ul { margin: 0; padding-left: 1.5em; columns: 2; }
     @media (max-width: 600px) { #mongo-book-list ul { columns: 1; } }
     #mongo-book-list li { margin: 0.2em 0; break-inside: avoid; }
+    .author-tables { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+    @media (max-width: 600px) { .author-tables { grid-template-columns: 1fr; } }
+    .author-tables h3 { margin: 0 0 0.5em; }
+    .author-entry { margin: 1em 0; }
+    .author-name { font-weight: bold; }
+    .author-count { opacity: 0.5; }
+    .author-books { font-size: 0.85em; opacity: 0.6; padding-left: 1em; list-style: none; margin: 0.2em 0 0; }
   </style>
 </head>
 <body>
@@ -89,6 +96,9 @@
 
   <div class="venns" id="venns"></div>
   <div id="book-list"><p><em>Click a region to see books.</em></p></div>
+
+  <h2>Authors</h2>
+  <div id="authors"></div>
 
   <h2>Where Books Come From</h2>
   <p>Country of origin based on author nationality. Hover for details.</p>
@@ -1157,6 +1167,70 @@
       document.getElementById('geo').appendChild(svg);
     }
 
+    function buildAuthors(doc) {
+      var allBooks = doc.querySelectorAll('li[data-status]');
+      var authors = {};
+
+      allBooks.forEach(function(li) {
+        var cite = li.querySelector('cite');
+        var title = cite ? cite.textContent : '?';
+        var year = li.getAttribute('data-year');
+        var isStarred = li.hasAttribute('data-starred');
+
+        li.querySelectorAll('.author').forEach(function(a) {
+          var name = a.textContent;
+          if (!authors[name]) authors[name] = { books: [], starred: 0 };
+          authors[name].books.push({ title: title, year: year, starred: isStarred });
+          if (isStarred) authors[name].starred++;
+        });
+      });
+
+      // Multi-read: authors with 2+ books
+      var multiRead = Object.keys(authors)
+        .filter(function(name) { return authors[name].books.length >= 2; })
+        .sort(function(a, b) { return authors[b].books.length - authors[a].books.length; });
+
+      // Multi-star: authors with 2+ starred books
+      var multiStar = Object.keys(authors)
+        .filter(function(name) { return authors[name].starred >= 2; })
+        .sort(function(a, b) { return authors[b].starred - authors[a].starred; });
+
+      var container = document.getElementById('authors');
+
+      function buildTable(list, countFn, label) {
+        var div = document.createElement('div');
+        var h3 = document.createElement('h3');
+        h3.textContent = label;
+        div.appendChild(h3);
+
+        list.forEach(function(name) {
+          var entry = document.createElement('div');
+          entry.className = 'author-entry';
+          entry.innerHTML = '<span class="author-name">' + name + '</span> <span class="author-count">' + countFn(authors[name]) + '</span>';
+
+          var bookList = document.createElement('ul');
+          bookList.className = 'author-books';
+          authors[name].books
+            .sort(function(a, b) { return (parseInt(a.year) || 0) - (parseInt(b.year) || 0); })
+            .forEach(function(b) {
+              var li = document.createElement('li');
+              li.textContent = (b.starred ? '\u2B50 ' : '') + b.title + ' (' + b.year + ')';
+              bookList.appendChild(li);
+            });
+          entry.appendChild(bookList);
+          div.appendChild(entry);
+        });
+
+        return div;
+      }
+
+      var wrapper = document.createElement('div');
+      wrapper.className = 'author-tables';
+      wrapper.appendChild(buildTable(multiRead, function(a) { return a.books.length + ' books'; }, 'Multi-read (' + multiRead.length + ')'));
+      wrapper.appendChild(buildTable(multiStar, function(a) { return a.starred + ' starred'; }, 'Multi-starred (' + multiStar.length + ')'));
+      container.appendChild(wrapper);
+    }
+
     fetch('index.html')
       .then(function(r) { return r.text(); })
       .then(function(html) {
@@ -1175,6 +1249,7 @@
 
         buildHistogram(doc);
         buildMongoDiagram(doc);
+        buildAuthors(doc);
         buildGeo(doc);
 
         // Count totals once
