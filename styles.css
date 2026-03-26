@@ -3,24 +3,38 @@
 /* Typography */
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 1.125rem;
   line-height: 1.6;
-  max-width: 90ch;
+  max-width: 70ch;
   margin: 2em auto;
   padding: 0 1em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Type scale: Cormorant Garamond for headings */
+h1 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(1.8rem, 1.4rem + 2vw, 2.5rem); line-height: 1.15; margin: 0 0 0.2em; font-weight: 600; }
+h2 { font-size: 1.5rem; line-height: 1.2; margin: 1.5em 0 0.5em; font-weight: 600; }
+h3 { font-size: 1.2rem; line-height: 1.25; margin: 1.2em 0 0.4em; font-weight: 600; }
+p { margin: 0 0 1em; }
 
 /* Nav */
 nav a { text-decoration: none; }
 nav a:hover { text-decoration: underline; }
 
 /* Shared footer */
-footer { margin-top: 2em; font-size: 0.85em; }
+footer { margin-top: 2em; font-size: 0.85em; opacity: 0.5; }
 footer hr { border: none; border-top: 1px solid #444; }
 @media (prefers-color-scheme: light) {
   footer hr { border-top-color: #ccc; }
 }
 footer a { text-decoration: none; }
 footer a:hover { text-decoration: underline; }
+.footer-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em 2em; margin: 1em 0; }
+.footer-columns h3 { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 0.85em; opacity: 0.5; margin: 0 0 0.3em; font-weight: normal; }
+.footer-columns ul { list-style: none; padding: 0; margin: 0 0 1em; }
+.footer-columns li { margin: 0.2em 0; }
+.footer-copyright { margin-top: 1em; }
 
 /* ── Checklist pages (caldecott, cbca, greenaway, newbery) ── */
 .grid {
@@ -61,11 +75,15 @@ footer a:hover { text-decoration: underline; }
 /* ── Controls: filter rows and pill buttons ── */
 #controls { margin: 1.2em 0; }
 .filter-row { display: flex; gap: 0.4em; flex-wrap: wrap; align-items: center; margin: 0.5em 0; }
-.filter-label { font-size: 0.8em; opacity: 0.5; min-width: 3.5em; }
+.filter-label { font-size: 0.85em; opacity: 0.5; min-width: 2.5em; }
+@media (max-width: 480px) {
+  .pill-text { display: none; }
+  .filter-label { display: none; }
+}
 
 .pill {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 0.8em;
+  font-size: 0.85em;
   padding: 0.25em 0.7em;
   border: 1.5px solid;
   border-radius: 3px;

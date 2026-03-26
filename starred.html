@@ -20,7 +20,6 @@
     .book-author { font-size: 0.85em; opacity: 0.7; }
     .book-awards { font-size: 0.8em; opacity: 0.6; }
     .book-review { font-size: 0.9em; font-style: italic; }
-    .book-review.placeholder { opacity: 0.4; }
     #loading { opacity: 0.5; }
     #filter-status { font-size: 0.85em; opacity: 0.7; margin: 0.3em 0; }
     #filter-status:empty { display: none; }
@@ -37,12 +36,14 @@
   <div id="controls">
     <div class="filter-row">
       <span class="filter-label">show</span>
-      <span id="award-buttons" class="filter-row"></span>
+      <button class="pill star-pill on" id="filter-starred">⭐ <span class="pill-text">starred</span></button>
+      <button class="pill award-pill" id="filter-awarded">🏅 <span class="pill-text">awarded</span></button>
     </div>
     <div class="filter-row">
       <span class="filter-label">sort</span>
       <button class="pill sort-pill on" data-sort="year-asc">year ↑</button>
       <button class="pill sort-pill" data-sort="year-desc">year ↓</button>
+      <button class="pill sort-pill" data-sort="added-desc">newest</button>
       <button class="pill sort-pill" data-sort="alpha">A→Z</button>
     </div>
   </div>
@@ -53,78 +54,43 @@
     <div id="starred-list"></div>
   </main>
   <footer>
-    <hr>
-    <p>Checklists: <a href="caldecott.html">Caldecott</a> · <a href="newbery.html">Newbery</a> · <a href="greenaway.html">Greenaway</a> · <a href="cbca.html">CBCA</a></p>
-    <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a> · <a href="sitemap.xml">Sitemap</a></p>
+  <hr>
+  <marquee>"A children's story that can only be enjoyed by children is not a good children's story in the slightest." -- C.S. Lewis, <cite>On Three Ways of Writing for Children</cite> (1952)</marquee>
+  <p><a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a></p>
+  <div class="footer-columns">
+    <div>
+      <h3>Site</h3>
+      <ul>
+        <li><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a></li>
+        <li><a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a></li>
+        <li><a href="sitemap.xml">Sitemap</a></li>
+      </ul>
+      <h3>Webring</h3>
+      <ul>
+        <li><a href="https://90s-internet.com">90s Internet Webring</a> · <a href="https://90s-internet.com/#random">random</a> · <a href="https://github.com/oatsandsugar/90s-internet/issues/new?title=Join%20the%20webring&amp;labels=join">join</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Analytics</h3>
+      <ul>
+        <li><a href="correlations.html">Correlations</a></li>
+        <li><a href="caldecott.html">Caldecott Medal</a></li>
+        <li><a href="newbery.html">Newbery Medal</a></li>
+        <li><a href="greenaway.html">Kate Greenaway Medal</a></li>
+        <li><a href="cbca.html">CBCA Picture Book</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer-copyright">© 2025-2026 Johanan Ottensooser. <a href="https://github.com/oatsandsugar/books-for-indigo/blob/main/LICENSE">MIT License</a>.</p>
   </footer>
 
   <script>
-    var PALETTE = ['#4a90d9', '#e05555', '#50a060', '#b065c0', '#d98a4a', '#5bbcd6', '#d94a7b', '#8a9a5b'];
     var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country'];
 
-    function prettyLabel(attr) {
-      var name = attr.replace(/^data-/, '');
-      return name.split('-').map(function(w) {
-        if (w.length <= 4) return w.toUpperCase();
-        return w.charAt(0).toUpperCase() + w.slice(1);
-      }).join(' ');
-    }
-
-    function awardFamily(attr) {
-      return attr.replace(/^data-/, '').replace(/-(medal|honor|book)$/, '');
-    }
-
-    function discoverAwards(allBooks) {
-      var attrCounts = {};
-      allBooks.forEach(function(li) {
-        Array.prototype.forEach.call(li.attributes, function(a) {
-          if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
-          if (!attrCounts[a.name]) attrCounts[a.name] = 0;
-          attrCounts[a.name]++;
-        });
+    function hasAnyAward(li) {
+      return Array.prototype.some.call(li.attributes, function(a) {
+        return a.name.indexOf('data-') === 0 && SKIP_ATTRS.indexOf(a.name) === -1;
       });
-
-      var families = {};
-      Object.keys(attrCounts).forEach(function(attr) {
-        var family = awardFamily(attr);
-        if (!families[family]) families[family] = [];
-        families[family].push(attr);
-      });
-
-      var result = [];
-      var colorIdx = 0;
-
-      Object.keys(families).forEach(function(family) {
-        var attrs = families[family];
-        var familyColor = PALETTE[colorIdx % PALETTE.length];
-        colorIdx++;
-
-        if (attrs.length > 1) {
-          result.push({
-            label: prettyLabel('data-' + family) + ' Winners & Honorees',
-            color: familyColor,
-            test: function(li) {
-              return attrs.some(function(a) { return li.hasAttribute(a); });
-            }
-          });
-          var medalAttr = attrs.filter(function(a) { return /-medal$/.test(a); })[0];
-          if (medalAttr) {
-            result.push({
-              label: prettyLabel(medalAttr),
-              color: familyColor,
-              test: function(li) { return li.hasAttribute(medalAttr); }
-            });
-          }
-        } else {
-          result.push({
-            label: prettyLabel(attrs[0]),
-            color: familyColor,
-            test: function(li) { return li.hasAttribute(attrs[0]); }
-          });
-        }
-      });
-
-      return result;
     }
 
     fetch('index.html')
@@ -132,52 +98,46 @@
       .then(function(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var allBooks = doc.querySelectorAll('li[data-status]');
-        var starred = doc.querySelectorAll('li[data-starred]');
         var container = document.getElementById('starred-list');
         var loading = document.getElementById('loading');
 
-        if (starred.length === 0) {
-          loading.textContent = 'No starred books found.';
-          return;
-        }
-
         loading.remove();
 
-        // Auto-discover award sets from ALL books (for consistent colours with correlations page)
-        var SETS = discoverAwards(allBooks);
-
-        // Store book elements and their source li for filtering
+        // Build book cards for ALL books with reviews
         var bookElements = [];
-
-        // Group by section
         var sections = {};
         var sectionOrder = [];
-        starred.forEach(function(li) {
+        var sectionHeaders = {};
+
+        allBooks.forEach(function(li) {
           var heading = li.closest('ul');
           var h2 = heading ? heading.previousElementSibling : null;
           var section = (h2 && h2.tagName === 'H2') ? h2.textContent : 'Other';
           if (!sections[section]) { sections[section] = []; sectionOrder.push(section); }
-          sections[section].push(li);
+          if (li.hasAttribute('data-review')) sections[section].push(li);
         });
 
-        var totalCount = 0;
-        var sectionHeaders = {};
-
         sectionOrder.forEach(function(section) {
-          var books = sections[section];
-          totalCount += books.length;
-
           var h2 = document.createElement('h2');
           h2.textContent = section;
           container.appendChild(h2);
           sectionHeaders[section] = h2;
 
-          books.forEach(function(li) {
+          sections[section].forEach(function(li) {
             var cite = li.querySelector('cite');
             var title = cite ? cite.textContent : '?';
-            var titleAttr = cite ? cite.getAttribute('title') : '';
+            var awards = [];
+            Array.prototype.forEach.call(li.attributes, function(a) {
+              if (SKIP_ATTRS.indexOf(a.name) !== -1 || a.name.indexOf('data-') !== 0) return;
+              var name = a.name.replace(/^data-/, '').split('-').map(function(w) {
+                return w.length <= 4 ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1);
+              }).join(' ');
+              awards.push(name + (a.value ? ' ' + a.value : ''));
+            });
+            var awardsText = awards.join(' · ');
             var year = li.getAttribute('data-year');
             var review = li.getAttribute('data-review') || '';
+            var isStarred = li.hasAttribute('data-starred');
 
             var authors = [];
             li.querySelectorAll('.author').forEach(function(a) {
@@ -196,7 +156,7 @@
 
             var titleLine = document.createElement('div');
             titleLine.className = 'book-title';
-            titleLine.innerHTML = '&#11088; <cite>' + title + '</cite>' + (year ? ' (' + year + ')' : '');
+            titleLine.innerHTML = (isStarred ? '&#11088; ' : '') + '<cite>' + title + '</cite>' + (year ? ' (' + year + ')' : '');
             div.appendChild(titleLine);
 
             if (authors.length > 0) {
@@ -206,17 +166,16 @@
               div.appendChild(authorLine);
             }
 
-            if (titleAttr) {
+            if (awardsText) {
               var awardsLine = document.createElement('div');
               awardsLine.className = 'book-awards';
-              awardsLine.textContent = titleAttr;
+              awardsLine.textContent = awardsText;
               div.appendChild(awardsLine);
             }
 
             if (review) {
               var rev = document.createElement('div');
               rev.className = 'book-review';
-              if (review === 'Review coming soon.') rev.classList.add('placeholder');
               rev.textContent = review;
               div.appendChild(rev);
             }
@@ -226,105 +185,38 @@
           });
         });
 
-        // Show count
-        // count removed for layout consistency
+        // --- Filters (matching index: starred, awarded) ---
+        var filters = { starred: 'yes', award: null }; // starred on by default
 
-        // --- Filter buttons ---
-        var controls = document.getElementById('award-buttons');
-        var states = SETS.map(function() { return 0; });
+        var starredBtn = document.getElementById('filter-starred');
+        var awardedBtn = document.getElementById('filter-awarded');
 
-        var buttons = SETS.map(function(s, i) {
-          var btn = document.createElement('button');
-          btn.className = 'pill';
-          btn.style.borderColor = s.color;
-          btn.textContent = s.label;
-          btn.addEventListener('click', function() {
-            states[i] = (states[i] + 1) % 3;
-            updateFilter();
-          });
-          controls.appendChild(btn);
-          return btn;
+        starredBtn.addEventListener('click', function() {
+          if (filters.starred) { filters.starred = null; starredBtn.classList.remove('on'); }
+          else { filters.starred = 'yes'; starredBtn.classList.add('on'); }
+          applyFilters();
         });
 
-        // Add a "No awards" button
-        var noAwardState = 0;
-        var noAwardBtn = document.createElement('button');
-        noAwardBtn.className = 'pill';
-        noAwardBtn.style.borderColor = '#888';
-        noAwardBtn.textContent = 'No Awards';
-        noAwardBtn.addEventListener('click', function() {
-          noAwardState = (noAwardState + 1) % 3;
-          updateFilter();
+        awardedBtn.addEventListener('click', function() {
+          if (filters.award) { filters.award = null; awardedBtn.classList.remove('on'); }
+          else { filters.award = 'any'; awardedBtn.classList.add('on'); }
+          applyFilters();
         });
-        controls.appendChild(noAwardBtn);
 
-        function hasAnyAward(li) {
-          return SETS.some(function(s) { return s.test(li); });
-        }
-
-        function updateFilter() {
-          var includes = [], excludes = [];
-          SETS.forEach(function(s, i) {
-            buttons[i].className = 'pill' + (states[i] === 1 ? ' on' : states[i] === 2 ? ' struck' : '');
-            buttons[i].style.color = states[i] >= 1 ? s.color : '';
-            if (states[i] === 1) includes.push(i);
-            if (states[i] === 2) excludes.push(i);
-          });
-
-          noAwardBtn.className = 'pill' + (noAwardState === 1 ? ' on' : noAwardState === 2 ? ' struck' : '');
-          noAwardBtn.style.color = noAwardState >= 1 ? '#888' : '';
-
-          var hasSelection = includes.length > 0 || excludes.length > 0 || noAwardState > 0;
-          var visibleCount = 0;
+        function applyFilters() {
           var visibleSections = {};
-
           bookElements.forEach(function(b) {
-            if (!hasSelection) {
-              b.el.classList.remove('hidden');
-              visibleCount++;
-              visibleSections[b.section] = true;
-              return;
-            }
+            var show = true;
+            if (filters.starred && !b.li.hasAttribute('data-starred')) show = false;
+            if (filters.award && !hasAnyAward(b.li)) show = false;
 
-            var match = true;
-            includes.forEach(function(i) { if (!SETS[i].test(b.li)) match = false; });
-            excludes.forEach(function(i) { if (SETS[i].test(b.li)) match = false; });
-            if (noAwardState === 1 && hasAnyAward(b.li)) match = false;
-            if (noAwardState === 2 && !hasAnyAward(b.li)) match = false;
-
-            if (match) {
-              b.el.classList.remove('hidden');
-              visibleCount++;
-              visibleSections[b.section] = true;
-            } else {
-              b.el.classList.add('hidden');
-            }
+            if (show) { b.el.classList.remove('hidden'); visibleSections[b.section] = true; }
+            else { b.el.classList.add('hidden'); }
           });
 
-          // Hide/show section headers
           sectionOrder.forEach(function(section) {
             sectionHeaders[section].style.display = visibleSections[section] ? '' : 'none';
           });
-
-          var statusEl = document.getElementById('filter-status');
-          if (!hasSelection) {
-            statusEl.textContent = '';
-          } else {
-            // Build descriptive filter string
-            var parts = [];
-            var incLabels = includes.map(function(i) { return SETS[i].label; });
-            var excLabels = excludes.map(function(i) { return SETS[i].label; });
-            if (noAwardState === 1) incLabels.push('No Awards');
-            if (noAwardState === 2) excLabels.push('No Awards');
-
-            var desc = visibleCount + ' of ' + totalCount + ' starred books';
-            if (incLabels.length > 0) desc += ' are ' + incLabels.join(' + ');
-            if (excLabels.length > 0) desc += ' but not ' + excLabels.join(' or ');
-
-            statusEl.textContent = desc;
-          }
-
-          // Update count
         }
 
         // --- Sort ---
@@ -338,18 +230,20 @@
             var tb = b.el.querySelector('cite').textContent;
             if (currentSort === 'year-asc') return ya - yb || ta.localeCompare(tb);
             if (currentSort === 'year-desc') return yb - ya || ta.localeCompare(tb);
+            if (currentSort === 'added-desc') {
+              var aa = a.li.getAttribute('data-added') || '';
+              var ab = b.li.getAttribute('data-added') || '';
+              return ab.localeCompare(aa) || yb - ya;
+            }
             if (currentSort === 'alpha') return ta.localeCompare(tb);
             return 0;
           });
 
-          // Remove section headers when sorting non-default
           sectionOrder.forEach(function(section) {
             sectionHeaders[section].style.display = currentSort === 'year-asc' ? '' : 'none';
           });
 
-          sorted.forEach(function(b) {
-            container.appendChild(b.el);
-          });
+          sorted.forEach(function(b) { container.appendChild(b.el); });
         }
 
         document.querySelectorAll('.pill[data-sort]').forEach(function(btn) {
@@ -360,6 +254,9 @@
             applySort();
           });
         });
+
+        // Apply initial filter (starred on by default)
+        applyFilters();
       });
   </script>
 </body>
