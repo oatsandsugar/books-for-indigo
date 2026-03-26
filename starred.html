@@ -11,9 +11,9 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://readingstori.es/starred.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="stylesheet" href="styles.css">
   <title>Starred — Books for Indigo</title>
   <style>
-    body { font-family: monospace; max-width: 70ch; margin: 2em auto; padding: 0 1em; }
     .book { margin: 1.2em 0; transition: opacity 0.15s; }
     .book.hidden { display: none; }
     .book-title cite { font-style: normal; font-weight: bold; }
@@ -21,34 +21,41 @@
     .book-awards { font-size: 0.8em; opacity: 0.6; }
     .book-review { font-size: 0.9em; font-style: italic; }
     .book-review.placeholder { opacity: 0.4; }
-    .count { opacity: 0.7; }
     #loading { opacity: 0.5; }
-    #controls { display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center; margin: 0.8em 0; }
-    .set-btn { font-family: monospace; font-size: 0.85em; padding: 0.3em 0.8em; border: 2px solid; border-radius: 3px; cursor: pointer; background: transparent; color: inherit; opacity: 0.4; transition: all 0.15s; }
-    .set-btn:hover { opacity: 0.7; }
-    .set-btn:focus-visible { outline: 2px solid; outline-offset: 2px; opacity: 0.7; }
-    .set-btn.include { opacity: 1; font-weight: bold; }
-    .set-btn.exclude { opacity: 1; text-decoration: line-through; }
-    #filter-status { text-align: center; font-size: 0.85em; opacity: 0.7; min-height: 1.5em; margin: 0.3em 0; }
+    #filter-status { font-size: 0.85em; opacity: 0.7; margin: 0.3em 0; }
+    #filter-status:empty { display: none; }
   </style>
 </head>
 <body>
   <header>
     <h1>Starred Books</h1>
-    <p>Our favourites, with a line about why.</p>
   </header>
   <nav>
-    <p><a href="index.html">&larr; Books for Indigo</a></p>
+    <p><a href="index.html">Books</a> · Reviews · <a href="correlations.html">Correlations</a> · <a href="about.html">About</a></p>
   </nav>
+
+  <div id="controls">
+    <div class="filter-row">
+      <span class="filter-label">show</span>
+      <span id="award-buttons" class="filter-row"></span>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">sort</span>
+      <button class="pill sort-pill on" data-sort="year-asc">year ↑</button>
+      <button class="pill sort-pill" data-sort="year-desc">year ↓</button>
+      <button class="pill sort-pill" data-sort="alpha">A→Z</button>
+    </div>
+  </div>
+  <div id="filter-status"></div>
+
   <main>
-    <div id="controls"></div>
-    <div id="filter-status"></div>
     <p id="loading">Loading...</p>
     <div id="starred-list"></div>
   </main>
   <footer>
     <hr>
-    <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+    <p>Checklists: <a href="caldecott.html">Caldecott</a> · <a href="newbery.html">Newbery</a> · <a href="greenaway.html">Greenaway</a> · <a href="cbca.html">CBCA</a></p>
+    <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a> · <a href="sitemap.xml">Sitemap</a></p>
   </footer>
 
   <script>
@@ -94,7 +101,7 @@
 
         if (attrs.length > 1) {
           result.push({
-            label: prettyLabel('data-' + family),
+            label: prettyLabel('data-' + family) + ' Winners & Honorees',
             color: familyColor,
             test: function(li) {
               return attrs.some(function(a) { return li.hasAttribute(a); });
@@ -219,17 +226,16 @@
           });
         });
 
-        // Add count to header
-        var header = document.querySelector('header p');
-        header.innerHTML += ' <span class="count">(' + totalCount + ' books)</span>';
+        // Show count
+        // count removed for layout consistency
 
         // --- Filter buttons ---
-        var controls = document.getElementById('controls');
+        var controls = document.getElementById('award-buttons');
         var states = SETS.map(function() { return 0; });
 
         var buttons = SETS.map(function(s, i) {
           var btn = document.createElement('button');
-          btn.className = 'set-btn';
+          btn.className = 'pill';
           btn.style.borderColor = s.color;
           btn.textContent = s.label;
           btn.addEventListener('click', function() {
@@ -243,7 +249,7 @@
         // Add a "No awards" button
         var noAwardState = 0;
         var noAwardBtn = document.createElement('button');
-        noAwardBtn.className = 'set-btn';
+        noAwardBtn.className = 'pill';
         noAwardBtn.style.borderColor = '#888';
         noAwardBtn.textContent = 'No Awards';
         noAwardBtn.addEventListener('click', function() {
@@ -259,14 +265,14 @@
         function updateFilter() {
           var includes = [], excludes = [];
           SETS.forEach(function(s, i) {
-            buttons[i].className = 'set-btn' + (states[i] === 1 ? ' include' : states[i] === 2 ? ' exclude' : '');
-            buttons[i].style.background = states[i] === 1 ? s.color + '33' : states[i] === 2 ? '#3332' : 'transparent';
+            buttons[i].className = 'pill' + (states[i] === 1 ? ' on' : states[i] === 2 ? ' struck' : '');
+            buttons[i].style.color = states[i] >= 1 ? s.color : '';
             if (states[i] === 1) includes.push(i);
             if (states[i] === 2) excludes.push(i);
           });
 
-          noAwardBtn.className = 'set-btn' + (noAwardState === 1 ? ' include' : noAwardState === 2 ? ' exclude' : '');
-          noAwardBtn.style.background = noAwardState === 1 ? '#88888833' : noAwardState === 2 ? '#3332' : 'transparent';
+          noAwardBtn.className = 'pill' + (noAwardState === 1 ? ' on' : noAwardState === 2 ? ' struck' : '');
+          noAwardBtn.style.color = noAwardState >= 1 ? '#888' : '';
 
           var hasSelection = includes.length > 0 || excludes.length > 0 || noAwardState > 0;
           var visibleCount = 0;
@@ -317,7 +323,43 @@
 
             statusEl.textContent = desc;
           }
+
+          // Update count
         }
+
+        // --- Sort ---
+        var currentSort = 'year-asc';
+
+        function applySort() {
+          var sorted = bookElements.slice().sort(function(a, b) {
+            var ya = parseInt(a.li.getAttribute('data-year')) || 0;
+            var yb = parseInt(b.li.getAttribute('data-year')) || 0;
+            var ta = a.el.querySelector('cite').textContent;
+            var tb = b.el.querySelector('cite').textContent;
+            if (currentSort === 'year-asc') return ya - yb || ta.localeCompare(tb);
+            if (currentSort === 'year-desc') return yb - ya || ta.localeCompare(tb);
+            if (currentSort === 'alpha') return ta.localeCompare(tb);
+            return 0;
+          });
+
+          // Remove section headers when sorting non-default
+          sectionOrder.forEach(function(section) {
+            sectionHeaders[section].style.display = currentSort === 'year-asc' ? '' : 'none';
+          });
+
+          sorted.forEach(function(b) {
+            container.appendChild(b.el);
+          });
+        }
+
+        document.querySelectorAll('.pill[data-sort]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.pill[data-sort]').forEach(function(b) { b.classList.remove('on'); });
+            btn.classList.add('on');
+            currentSort = btn.getAttribute('data-sort');
+            applySort();
+          });
+        });
       });
   </script>
 </body>

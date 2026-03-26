@@ -11,9 +11,9 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://readingstori.es/correlations.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="stylesheet" href="styles.css">
   <title>Correlations — Books for Indigo</title>
   <style>
-    body { font-family: monospace; max-width: 90ch; margin: 2em auto; padding: 0 1em; }
     #histogram { overflow-x: auto; margin: 1em 0 0; }
     #histogram svg { display: block; }
     #hist-stats { font-size: 0.8em; opacity: 0.85; margin-top: -0.5em; display: flex; flex-direction: column; align-items: center; }
@@ -47,12 +47,6 @@
     .legend span { display: flex; align-items: center; gap: 0.3em; }
     .legend .dot { width: 0.8em; height: 0.8em; border-radius: 50%; display: inline-block; }
     #mongo svg { display: block; margin: 0 auto; }
-    #mongo-controls { display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center; margin: 0.8em 0; }
-    .set-btn { font-family: monospace; font-size: 0.85em; padding: 0.3em 0.8em; border: 2px solid; border-radius: 3px; cursor: pointer; background: transparent; color: inherit; opacity: 0.4; transition: all 0.15s; }
-    .set-btn:hover { opacity: 0.7; }
-    .set-btn:focus-visible { outline: 2px solid; outline-offset: 2px; opacity: 0.7; }
-    .set-btn.include { opacity: 1; font-weight: bold; }
-    .set-btn.exclude { opacity: 1; text-decoration: line-through; }
     #mongo-query { text-align: center; font-size: 0.85em; margin: 0.5em 0; min-height: 1.5em; opacity: 0.7; }
     #mongo-book-list { margin-top: 1em; min-height: 2em; }
     #mongo-book-list h3 { margin: 0 0 0.5em; }
@@ -66,12 +60,17 @@
     <h1>Correlations</h1>
   </header>
   <nav>
-    <p><a href="index.html">&larr; Books for Indigo</a></p>
+    <p><a href="index.html">Books</a> · <a href="starred.html">Reviews</a> · Correlations · <a href="about.html">About</a></p>
   </nav>
-  <main>
-
-  <div id="mongo-controls"></div>
+  <div id="controls">
+    <div class="filter-row">
+      <span class="filter-label">show</span>
+      <span id="mongo-controls" class="filter-row"></span>
+    </div>
+  </div>
   <div id="mongo-query"></div>
+
+  <main>
 
   <h2>Year &cap; Stars</h2>
   <div id="histogram"></div>
@@ -98,7 +97,8 @@
   </main>
   <footer>
   <hr>
-  <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+  <p>Checklists: <a href="caldecott.html">Caldecott</a> · <a href="newbery.html">Newbery</a> · <a href="greenaway.html">Greenaway</a> · <a href="cbca.html">CBCA</a></p>
+  <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a> · <a href="sitemap.xml">Sitemap</a></p>
   </footer>
 
   <script>
@@ -866,7 +866,7 @@
 
       var buttons = SETS.map(function(s, i) {
         var btn = document.createElement('button');
-        btn.className = 'set-btn';
+        btn.className = 'pill';
         btn.style.borderColor = s.color;
         btn.textContent = s.label;
         btn.addEventListener('click', function() {
@@ -882,8 +882,8 @@
       function updateSelector() {
         var includes = [], excludes = [];
         SETS.forEach(function(s, i) {
-          buttons[i].className = 'set-btn' + (states[i] === 1 ? ' include' : states[i] === 2 ? ' exclude' : '');
-          buttons[i].style.background = states[i] === 1 ? s.color + '33' : states[i] === 2 ? '#3332' : 'transparent';
+          buttons[i].className = 'pill' + (states[i] === 1 ? ' on' : states[i] === 2 ? ' struck' : '');
+          buttons[i].style.color = states[i] >= 1 ? s.color : '';
           if (states[i] === 1) includes.push(i);
           if (states[i] === 2) excludes.push(i);
         });

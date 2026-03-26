@@ -11,45 +11,10 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://readingstori.es/cbca.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏅</text></svg>">
+  <link rel="stylesheet" href="styles.css">
   <title>CBCA Picture Book Checklist — Books for Indigo</title>
   <style>
-    body { font-family: monospace; max-width: 80ch; margin: 2em auto; padding: 0 1em; }
-    .grid {
-      display: inline-grid;
-      grid-template-columns: 1.5em repeat(8, 1.8em);
-      gap: 0.25em;
-      align-items: center;
-      justify-items: center;
-      margin: 1em 0;
-    }
-    .grid .label { font-size: 0.7em; color: gray; }
-    .grid .cell {
-      width: 1.2em;
-      height: 1.2em;
-      border-radius: 0.2em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .unread { background: #444; }
-    .read { background: #2ea043; }
-    .starred { background: #2ea043; color: white; font-size: 0.9em; }
-    .empty { }
-    @media (prefers-color-scheme: light) {
-      .unread { background: #ddd; }
-    }
-    .legend { margin: 1em 0; font-size: small; }
-    .legend .swatch {
-      display: inline-block;
-      width: 0.9em;
-      height: 0.9em;
-      border-radius: 0.15em;
-      vertical-align: middle;
-      margin-right: 0.2em;
-    }
-    .list-read cite { font-weight: bold; }
-    .list-unread { opacity: 0.5; }
-    h3 { margin-top: 1.5em; margin-bottom: 0.5em; }
+    .grid { grid-template-columns: 1.5em repeat(8, 1.8em); }
   </style>
 </head>
 <body>
@@ -57,7 +22,7 @@
     <h1>CBCA Picture Book Checklist</h1>
   </header>
   <nav>
-    <p><a href="index.html">&larr; Books for Indigo</a></p>
+    <p><a href="index.html">Books</a> · <a href="starred.html">Reviews</a> · <a href="correlations.html">Correlations</a> · <a href="about.html">About</a></p>
   </nav>
   <main>
   <p>The <a href="https://cbca.org.au/">CBCA Picture Book of the Year</a> has been awarded by the Children's Book Council of Australia since 1956. 56 books have won across 54 award years.</p>
@@ -286,7 +251,8 @@
   </main>
   <footer>
   <hr>
-  <p><small><a href="index.html">&larr; Back to Books for Indigo</a></small></p>
+  <p>Checklists: <a href="caldecott.html">Caldecott</a> · <a href="newbery.html">Newbery</a> · <a href="greenaway.html">Greenaway</a> · CBCA</p>
+  <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a> · <a href="sitemap.xml">Sitemap</a></p>
   </footer>
 
   <script>

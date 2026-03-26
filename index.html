@@ -13,27 +13,16 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <link rel="alternate" type="application/rss+xml" title="Books for Indigo" href="feed.xml">
   <link rel="alternate" type="application/rss+xml" title="Books for Indigo — Starred" href="starred.xml">
+  <link rel="stylesheet" href="styles.css">
   <title>Books for Indigo</title>
   <style>
-    body { font-family: monospace; line-height: 1.55; }
     ul { padding-left: 1.5em; }
-    li[data-status] { margin: 0.3em 0; color: #999; }
-    li[data-status] cite { color: #ddd; }
+    li[data-status] { margin: 0.5em 0; color: #999; }
+    li[data-status] cite { color: #ddd; font-weight: bold; }
+    .role { font-size: 0.85em; opacity: 0.6; }
     @media (prefers-color-scheme: light) { li[data-status] { color: #666; } li[data-status] cite { color: #111; } }
     details > :not(summary) { margin-left: 1.2em; font-size: x-small; }
     .new-badge { font-size: x-small; color: #0a0; font-weight: bold; }
-    #controls { margin: 1.2em 0; }
-    .filter-row { display: flex; gap: 0.4em; flex-wrap: wrap; align-items: center; margin: 0.5em 0; }
-    .filter-label { font-size: 0.8em; opacity: 0.5; min-width: 3.5em; }
-    .pill { font-family: monospace; font-size: 0.8em; padding: 0.25em 0.7em; border: 1.5px solid; border-radius: 1em; cursor: pointer; background: transparent; color: inherit; opacity: 0.35; transition: all 0.15s; white-space: nowrap; }
-    .pill:hover { opacity: 0.6; }
-    .pill.on { opacity: 1; font-weight: bold; }
-    .pill.star-pill.on { border-color: #d4a017; color: #d4a017; }
-    .pill.award-pill.on { border-color: #4a90d9; color: #4a90d9; }
-    .pill.section-pill.on { border-color: #50a060; color: #50a060; }
-    .pill.country-pill.on { border-color: #b065c0; color: #b065c0; }
-    .pill.sort-pill.on { border-color: #e05555; color: #e05555; }
-    #result-count { font-size: 0.8em; opacity: 0.5; margin: 0.3em 0; }
     li[data-status].hidden { display: none; }
     .country-chip { font-size: 0.7em; border: 1px solid; border-radius: 0.3em; padding: 0 0.3em; margin-left: 0.4em; opacity: 0.4; vertical-align: middle; display: none; }
     body.show-rich .country-chip { display: inline; }
@@ -41,13 +30,6 @@
     .review-line { font-style: italic; margin-left: 1.2em; }
     body.show-rich .rich-data { display: inline; }
     body.show-rich .review-line { display: block; }
-    @media (prefers-color-scheme: light) {
-      .pill.star-pill.on { border-color: #a07800; color: #a07800; }
-      .pill.award-pill.on { border-color: #2a60a9; color: #2a60a9; }
-      .pill.section-pill.on { border-color: #307040; color: #307040; }
-      .pill.country-pill.on { border-color: #8045a0; color: #8045a0; }
-      .pill.sort-pill.on { border-color: #c03535; color: #c03535; }
-    }
   </style>
 </head>
 <body>
@@ -55,7 +37,7 @@
     <h1>Books for Indigo</h1>
   </header>
   <nav>
-    <p><a href="starred.html">⭐ Reviews</a> · <a href="correlations.html">📊 Correlations</a> · <a href="about.html">ℹ️ About</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">💡 Suggest a book</a></p>
+    <p>Books · <a href="starred.html">Reviews</a> · <a href="correlations.html">Correlations</a> · <a href="about.html">About</a></p>
   </nav>
 
   <div id="controls">
@@ -64,7 +46,6 @@
       <button class="pill star-pill" data-filter="starred" data-value="yes">⭐ starred</button>
       <button class="pill award-pill" data-filter="award" data-value="any">🏅 awarded</button>
       <button class="pill" id="toggle-rich">📋 details</button>
-      <span id="result-count"></span>
     </div>
     <div class="filter-row">
       <span class="filter-label">sort</span>
@@ -270,13 +251,12 @@
 
   </main>
   <!-- Footer -->
-  <footer style="margin-top: 3em;">
-  <hr style="margin-bottom: 1.5em;">
-  <small><marquee>"A children's story that can only be enjoyed by children is not a good children's story in the slightest." — C.S. Lewis, <cite>On Three Ways of Writing for Children</cite> (1952)</marquee></small>
-  <p><small>🏅 <a href="caldecott.html">Caldecott</a> · <a href="newbery.html">Newbery</a> · <a href="greenaway.html">Greenaway</a> · <a href="cbca.html">CBCA</a><br>
-  🔗 <a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a> · <a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a> · <a href="sitemap.xml">Sitemap</a></small></p>
-  <p><small>🌐 <a href="https://90s-internet.com"><b>90s Internet Webring</b></a> · <a href="https://90s-internet.com/#random">random</a> · <a href="https://github.com/oatsandsugar/90s-internet/issues/new?title=Join%20the%20webring&amp;labels=join">join</a></small></p>
-  <p><small>© 2025–2026 Johanan Ottensooser. <a href="https://github.com/oatsandsugar/books-for-indigo/blob/main/LICENSE">MIT License</a>.</small></p>
+  <footer>
+  <hr>
+  <small><marquee>"A children's story that can only be enjoyed by children is not a good children's story in the slightest." -- C.S. Lewis, <cite>On Three Ways of Writing for Children</cite> (1952)</marquee></small>
+  <p><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a> · <a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a> · <a href="sitemap.xml">Sitemap</a></p>
+  <p><a href="https://90s-internet.com"><b>90s Internet Webring</b></a> · <a href="https://90s-internet.com/#random">random</a> · <a href="https://github.com/oatsandsugar/90s-internet/issues/new?title=Join%20the%20webring&amp;labels=join">join</a></p>
+  <p>© 2025-2026 Johanan Ottensooser. <a href="https://github.com/oatsandsugar/books-for-indigo/blob/main/LICENSE">MIT License</a>.</p>
   </footer>
 
   <p><small><i>P.S. 🥚 This page has rich data!</i></small></p>
@@ -404,7 +384,6 @@
       });
 
       var total = allBooks.length;
-      document.getElementById('result-count').textContent = visible < total ? visible + ' of ' + total + ' books' : total + ' books';
     }
 
     // Pill toggle logic — click to activate, click again to deactivate
@@ -448,7 +427,6 @@
     });
 
     // Initial count
-    document.getElementById('result-count').textContent = allBooks.length + ' books';
   </script>
 </body>
 </html>
