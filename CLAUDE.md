@@ -64,6 +64,7 @@ Currently-reading books are marked with `(currently reading)` prefix text.
 ## TODOs
 
 - ~~Add `<details>` collapsible sections~~ (done: easter egg in footer)
+- Write reviews for: A House That Once Was, We Are One
 
 ## Future ideas
 
