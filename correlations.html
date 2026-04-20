@@ -138,16 +138,23 @@
   </footer>
 
   <script>
-    // Structural attributes to exclude from award auto-discovery
-    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country'];
+    // Structural attributes to exclude from award auto-discovery.
+    // data-publisher is on every book, so comparing "Publisher" to "Starred" is
+    // tautological — it's just the starred base rate projected onto every book.
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country', 'data-publisher'];
+    // Awards with fewer members than this are dropped from auto-discovery.
+    // A Venn of n=1 carries no signal; it just clutters the chart.
+    var MIN_AWARD_COUNT = 2;
     // Color palette for auto-discovered awards
     var PALETTE = ['#4a90d9', '#e05555', '#50a060', '#b065c0', '#d98a4a', '#5bbcd6', '#d94a7b', '#8a9a5b'];
 
-    // Prettify attribute names
+    // Prettify attribute names. Short vowel-less tokens (nyt, cbca) are
+    // treated as acronyms; everything else is title-cased. Previously any
+    // word <=4 chars was uppercased, which turned "book" into "BOOK".
     function prettyLabel(attr) {
       var name = attr.replace(/^data-/, '');
       return name.split('-').map(function(w) {
-        if (w.length <= 4) return w.toUpperCase();
+        if (w.length <= 4 && !/[aeiou]/i.test(w)) return w.toUpperCase();
         return w.charAt(0).toUpperCase() + w.slice(1);
       }).join(' ');
     }
@@ -791,7 +798,28 @@
         }
       }
 
-      // Fit to bounding box
+      // Order for drawing + label placement (largest circle first / bottom)
+      var order = SETS.map(function(_, i) { return i; });
+      order.sort(function(a, b) { return radii[b] - radii[a]; });
+
+      // Pre-compute label anchor positions (in circle-coordinate space),
+      // with collision-nudging, so the bounding box can accommodate them.
+      var labelPositions = order.slice().reverse().map(function(i) {
+        return { i: i, cx: pos[i].x, cy: pos[i].y, r: radii[i], x: pos[i].x, y: pos[i].y - radii[i] - 12 };
+      });
+      labelPositions.sort(function(a, b) { return a.x - b.x; });
+      for (var pass = 0; pass < 8; pass++) {
+        for (var a = 0; a < labelPositions.length; a++) {
+          for (var b = a + 1; b < labelPositions.length; b++) {
+            var la = labelPositions[a], lb = labelPositions[b];
+            if (Math.abs(la.x - lb.x) < 90 && Math.abs(la.y - lb.y) < 16) {
+              (la.y < lb.y ? la : lb).y -= 18;
+            }
+          }
+        }
+      }
+
+      // Fit to bounding box (circles + label anchors with a label-height budget)
       var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
       pos.forEach(function(p, i) {
         minX = Math.min(minX, p.x - radii[i]);
@@ -799,7 +827,12 @@
         minY = Math.min(minY, p.y - radii[i]);
         maxY = Math.max(maxY, p.y + radii[i]);
       });
-      var pad = 40;
+      labelPositions.forEach(function(lp) {
+        minX = Math.min(minX, lp.x - 50);
+        maxX = Math.max(maxX, lp.x + 50);
+        minY = Math.min(minY, lp.y - 6);
+      });
+      var pad = 24;
       var drawW = maxX - minX + pad * 2;
       var drawH = maxY - minY + pad * 2;
       var offsetX = -minX + pad;
@@ -814,9 +847,6 @@
       svg.style.maxWidth = drawW + 'px';
 
       // Draw circles (largest first for z-order)
-      var order = SETS.map(function(_, i) { return i; });
-      order.sort(function(a, b) { return radii[b] - radii[a]; });
-
       var svgCircles = []; // store SVG circle elements for highlighting
       order.forEach(function(i) {
         var s = SETS[i];
@@ -835,51 +865,32 @@
         svgCircles[i] = circle;
       });
 
-      // Detect which circles are supersets (fully contain a smaller circle)
-      var labelOffsetY = {};
-      for (var i = 0; i < n; i++) {
-        labelOffsetY[i] = 0;
-        for (var j = 0; j < n; j++) {
-          if (i === j) continue;
-          // Check if j is fully inside i (subset)
-          var dx = pos[j].x - pos[i].x;
-          var dy = pos[j].y - pos[i].y;
-          var d = Math.sqrt(dx * dx + dy * dy);
-          if (d + radii[j] <= radii[i] + 2) {
-            // j is inside i — push i's label toward top of its circle
-            labelOffsetY[i] = -radii[i] * 0.55;
-            break;
-          }
-        }
-      }
+      // Draw pre-computed labels with leader lines, applying the viewport offset.
+      labelPositions.forEach(function(lp) {
+        var s = SETS[lp.i];
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', lp.cx + offsetX);
+        line.setAttribute('y1', lp.cy + offsetY - lp.r);
+        line.setAttribute('x2', lp.x + offsetX);
+        line.setAttribute('y2', lp.y + offsetY + 3);
+        line.setAttribute('stroke', s.color);
+        line.setAttribute('stroke-width', '1');
+        line.setAttribute('stroke-opacity', '0.5');
+        line.setAttribute('pointer-events', 'none');
+        svg.appendChild(line);
 
-      // Labels on top
-      order.slice().reverse().forEach(function(i) {
-        var s = SETS[i];
-        var px = pos[i].x + offsetX;
-        var py = pos[i].y + offsetY + labelOffsetY[i];
         var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', px);
-        text.setAttribute('y', py);
+        text.setAttribute('x', lp.x + offsetX);
+        text.setAttribute('y', lp.y + offsetY);
         text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('font-family', 'monospace');
-        text.setAttribute('font-size', radii[i] > 30 ? '11' : '9');
-        text.setAttribute('fill', 'currentColor');
+        text.setAttribute('font-family', 'ui-monospace, SFMono-Regular, Menlo, monospace');
+        text.setAttribute('font-size', '10');
+        text.setAttribute('fill', s.color);
+        text.setAttribute('font-weight', '600');
+        text.setAttribute('letter-spacing', '0.04em');
         text.setAttribute('pointer-events', 'none');
-        text.textContent = s.label;
+        text.textContent = s.label.toUpperCase() + '  ' + members[s.key].length;
         svg.appendChild(text);
-
-        var count = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        count.setAttribute('x', px);
-        count.setAttribute('y', py + 14);
-        count.setAttribute('text-anchor', 'middle');
-        count.setAttribute('font-family', 'monospace');
-        count.setAttribute('font-size', '10');
-        count.setAttribute('fill', 'currentColor');
-        count.setAttribute('opacity', '0.7');
-        count.setAttribute('pointer-events', 'none');
-        count.textContent = '(' + members[s.key].length + ')';
-        svg.appendChild(count);
       });
 
       // Add a <defs> for dynamic clipPaths/masks and a highlight group
@@ -1237,8 +1248,13 @@
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var allBooks = doc.querySelectorAll('li[data-status]');
 
-        // Auto-discover awards from data attributes
-        AWARDS = discoverAwards(allBooks);
+        // Auto-discover awards from data attributes, then drop any with too
+        // few members to form a meaningful comparison.
+        AWARDS = discoverAwards(allBooks).filter(function(a) {
+          var n = 0;
+          allBooks.forEach(function(li) { if (a.test(li)) n++; });
+          return n >= MIN_AWARD_COUNT;
+        });
 
         // Build dynamic legend
         var legendEl = document.getElementById('pairwise-legend');
