@@ -90,6 +90,8 @@ footer a:hover { text-decoration: underline; }
   cursor: pointer;
   background: transparent;
   color: inherit;
+  box-sizing: border-box;
+  min-height: 2.3em;
   opacity: 0.35;
   transition: all 0.15s;
   white-space: nowrap;
@@ -102,9 +104,11 @@ footer a:hover { text-decoration: underline; }
 /* Pill color variants */
 .pill.star-pill.on { border-color: #d4a017; color: #d4a017; }
 .pill.award-pill.on { border-color: #4a90d9; color: #4a90d9; }
+.pill.completion-pill.on { border-color: #2ea043; color: #2ea043; }
 .pill.sort-pill.on { border-color: #e05555; color: #e05555; }
 @media (prefers-color-scheme: light) {
   .pill.star-pill.on { border-color: #a07800; color: #a07800; }
   .pill.award-pill.on { border-color: #2a60a9; color: #2a60a9; }
+  .pill.completion-pill.on { border-color: #18752b; color: #18752b; }
   .pill.sort-pill.on { border-color: #c03535; color: #c03535; }
 }

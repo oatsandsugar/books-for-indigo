@@ -24,12 +24,35 @@
     details > :not(summary) { margin-left: 1.2em; font-size: x-small; }
     .new-badge { font-size: x-small; color: #0a0; font-weight: bold; }
     li[data-status].hidden { display: none; }
+    body.has-completion-controls li.personally-completed { opacity: 0.55; }
+    body.has-completion-controls li.personally-completed cite { text-decoration: line-through; text-decoration-thickness: 0.08em; }
+    .completion-checkbox { display: none; margin: 0 0.45em 0 0; accent-color: #2ea043; cursor: pointer; transform: scale(1.1); }
+    body.has-completion-controls .completion-label { cursor: pointer; }
+    body.has-completion-controls ul[data-section] { list-style: none; }
+    body.has-completion-controls .completion-checkbox { display: inline-block; margin-left: -1.15em; }
+    #completion-toggle-label { cursor: pointer; }
+    #completion-toggle { accent-color: #2ea043; cursor: pointer; margin: 0 0.3em 0 0; vertical-align: -0.1em; }
+    body:not(.has-completion-controls) .completion-stats { display: none; }
+    .completion-stats { margin-left: 0.6em; }
+    #reading-progress { font-size: 0.8em; margin: 0.65em 0 0 3.2em; color: #999; }
+    #reading-progress[hidden], .pill[hidden] { display: none; }
+    .local-storage-note { opacity: 0.65; margin-left: 0.35em; }
+    #clear-completed { border: 0; padding: 0; margin-left: 0.35em; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+    #clear-completed:hover { color: #ddd; }
     .country-chip { font-size: 0.7em; border: 1px solid; border-radius: 0.3em; padding: 0 0.3em; margin-left: 0.4em; opacity: 0.4; vertical-align: middle; display: none; }
     body.show-rich .country-chip { display: inline; }
     .rich-data { font-size: 0.8em; opacity: 0.5; display: none; }
     .review-line { font-style: italic; margin-left: 1.2em; }
     body.show-rich .rich-data { display: inline; }
     body.show-rich .review-line { display: block; }
+    @media (prefers-color-scheme: light) {
+      #reading-progress { color: #666; }
+      #clear-completed:hover { color: #111; }
+    }
+    @media (max-width: 480px) {
+      #reading-progress { margin-left: 0; }
+      .local-storage-note { display: block; margin-left: 0; }
+    }
   </style>
 </head>
 <body>
@@ -45,6 +68,7 @@
       <span class="filter-label">show</span>
       <button class="pill star-pill" data-filter="starred" data-value="yes">⭐ <span class="pill-text">starred</span></button>
       <button class="pill award-pill" data-filter="award" data-value="any">🏅 <span class="pill-text">awarded</span></button>
+      <button class="pill completion-pill" id="show-uncompleted" data-filter="completion" data-value="uncompleted" hidden>☐ <span class="pill-text">uncompleted</span></button>
       <button class="pill" id="toggle-rich">📋 <span class="pill-text">details</span></button>
     </div>
     <div class="filter-row">
@@ -53,6 +77,14 @@
       <button class="pill sort-pill" data-sort="year-desc">year ↓</button>
       <button class="pill sort-pill" data-sort="added-desc">newest</button>
       <button class="pill sort-pill" data-sort="alpha">A→Z</button>
+    </div>
+    <div id="reading-progress" hidden>
+      <label id="completion-toggle-label"><input type="checkbox" id="completion-toggle"> track your reading</label>
+      <span class="completion-stats">
+        <span id="reading-progress-text" aria-live="polite"></span>
+        <span class="local-storage-note">Saved only in this browser.</span>
+        <button type="button" id="clear-completed" hidden>Reset</button>
+      </span>
     </div>
   </div>
 
@@ -403,8 +435,12 @@
 
 
     // State
-    var filters = { starred: null, award: null };
+    var filters = { starred: null, award: null, completion: null };
     var currentSort = 'year-asc';
+    var COMPLETED_STORAGE_KEY = 'books-for-indigo.completed.v1';
+    var COMPLETION_VISIBLE_KEY = 'books-for-indigo.completion-visible.v1';
+    var completedBookIds = {};
+    var canSaveCompleted = true;
 
     function hasAnyAward(li) {
       return Array.prototype.some.call(li.attributes, function(a) {
@@ -417,6 +453,110 @@
       return c ? c.textContent : '';
     }
 
+    function getBookId(li) {
+      var section = li.parentElement.getAttribute('data-section') || '';
+      return [section, li.getAttribute('data-year') || '', getTitle(li)].join('::');
+    }
+
+    function loadCompleted() {
+      try {
+        var saved = JSON.parse(localStorage.getItem(COMPLETED_STORAGE_KEY) || '[]');
+        if (!Array.isArray(saved)) return;
+        saved.forEach(function(id) {
+          if (typeof id === 'string') completedBookIds[id] = true;
+        });
+      } catch (error) {
+        canSaveCompleted = false;
+      }
+    }
+
+    function saveCompleted() {
+      if (!canSaveCompleted) return;
+      try {
+        localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify(Object.keys(completedBookIds)));
+      } catch (error) {
+        canSaveCompleted = false;
+        updateReadingProgress();
+      }
+    }
+
+    function updateCompletedBook(li, completed) {
+      var id = getBookId(li);
+      if (completed) completedBookIds[id] = true;
+      else delete completedBookIds[id];
+      li.classList.toggle('personally-completed', completed);
+      var checkbox = li.querySelector('.completion-checkbox');
+      if (checkbox) {
+        checkbox.checked = completed;
+        checkbox.setAttribute('aria-label', (completed ? 'Mark as uncompleted: ' : 'Mark as completed: ') + getTitle(li));
+      }
+    }
+
+    function updateReadingProgress() {
+      var completed = document.querySelectorAll('li[data-status].personally-completed').length;
+      var progress = document.getElementById('reading-progress');
+      var note = progress.querySelector('.local-storage-note');
+      document.getElementById('reading-progress-text').textContent = completed + ' of ' + allBooks.length + ' completed.';
+      note.textContent = canSaveCompleted ? 'Saved only in this browser.' : 'Kept for this visit only.';
+      document.getElementById('clear-completed').hidden = completed === 0;
+    }
+
+    function addCompletionControls() {
+      loadCompleted();
+      allBooks.forEach(function(li, index) {
+        var checkbox = document.createElement('input');
+        var title = li.querySelector('cite');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'book-completion-' + index;
+        checkbox.className = 'completion-checkbox';
+        checkbox.setAttribute('aria-label', 'Mark as completed: ' + getTitle(li));
+        checkbox.checked = !!completedBookIds[getBookId(li)];
+        li.insertBefore(checkbox, li.firstChild);
+        if (title) {
+          var label = document.createElement('label');
+          label.className = 'completion-label';
+          label.htmlFor = checkbox.id;
+          title.parentNode.insertBefore(label, title);
+          label.appendChild(title);
+        }
+        updateCompletedBook(li, checkbox.checked);
+        checkbox.addEventListener('change', function() {
+          updateCompletedBook(li, checkbox.checked);
+          saveCompleted();
+          updateReadingProgress();
+          apply();
+        });
+      });
+      var toggle = document.getElementById('completion-toggle');
+      // Default on for visitors with saved completion data, unless they chose to hide it
+      var visible = false;
+      try {
+        var savedPref = localStorage.getItem(COMPLETION_VISIBLE_KEY);
+        visible = savedPref === null ? Object.keys(completedBookIds).length > 0 : savedPref === '1';
+      } catch (error) {}
+      toggle.checked = visible;
+      setCompletionTracking(visible);
+      toggle.addEventListener('change', function() {
+        setCompletionTracking(toggle.checked);
+        try { localStorage.setItem(COMPLETION_VISIBLE_KEY, toggle.checked ? '1' : '0'); } catch (error) {}
+      });
+      document.getElementById('reading-progress').hidden = false;
+      updateReadingProgress();
+    }
+
+    function setCompletionTracking(on) {
+      document.body.classList.toggle('has-completion-controls', on);
+      // Disabled checkboxes stop hidden label clicks from toggling completion
+      document.querySelectorAll('.completion-checkbox').forEach(function(cb) { cb.disabled = !on; });
+      var pill = document.getElementById('show-uncompleted');
+      pill.hidden = !on;
+      if (!on && filters.completion) {
+        filters.completion = null;
+        pill.classList.remove('on');
+      }
+      apply();
+    }
+
     function apply() {
       var visible = 0;
 
@@ -424,6 +564,7 @@
         var show = true;
         if (filters.starred === 'yes' && !li.hasAttribute('data-starred')) show = false;
         if (filters.award === 'any' && !hasAnyAward(li)) show = false;
+        if (filters.completion === 'uncompleted' && li.classList.contains('personally-completed')) show = false;
 
         if (show) { li.classList.remove('hidden'); visible++; }
         else { li.classList.add('hidden'); }
@@ -494,6 +635,17 @@
       document.body.classList.toggle('show-rich');
       richBtn.classList.toggle('on');
     });
+
+    document.getElementById('clear-completed').addEventListener('click', function() {
+      if (!window.confirm('Clear your completed books on this browser?')) return;
+      completedBookIds = {};
+      allBooks.forEach(function(li) { updateCompletedBook(li, false); });
+      saveCompleted();
+      updateReadingProgress();
+      apply();
+    });
+
+    addCompletionControls();
 
     // Apply the initially selected sort before the user interacts
     apply();
