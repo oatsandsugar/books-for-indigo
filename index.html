@@ -372,6 +372,7 @@
   -->
   <script>
     var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country'];
+    var NON_AWARD_ATTRS = SKIP_ATTRS.concat(['data-publisher']);
     var allBooks = document.querySelectorAll('li[data-status]');
 
     // Auto-render stars
@@ -435,7 +436,7 @@
 
     function hasAnyAward(li) {
       return Array.prototype.some.call(li.attributes, function(a) {
-        return a.name.indexOf('data-') === 0 && SKIP_ATTRS.indexOf(a.name) === -1;
+        return a.name.indexOf('data-') === 0 && NON_AWARD_ATTRS.indexOf(a.name) === -1;
       });
     }
 
@@ -613,6 +614,9 @@
     });
 
     addCompletionControls();
+
+    // Apply the initially selected sort before the user interacts
+    apply();
   </script>
 </body>
 </html>
