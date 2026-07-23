@@ -24,12 +24,16 @@
     details > :not(summary) { margin-left: 1.2em; font-size: x-small; }
     .new-badge { font-size: x-small; color: #0a0; font-weight: bold; }
     li[data-status].hidden { display: none; }
-    li.personally-completed { opacity: 0.55; }
-    li.personally-completed cite { text-decoration: line-through; text-decoration-thickness: 0.08em; }
-    .completion-checkbox { margin: 0 0.45em 0 0; accent-color: #2ea043; cursor: pointer; transform: scale(1.1); }
-    .completion-label { cursor: pointer; }
+    body.has-completion-controls li.personally-completed { opacity: 0.55; }
+    body.has-completion-controls li.personally-completed cite { text-decoration: line-through; text-decoration-thickness: 0.08em; }
+    .completion-checkbox { display: none; margin: 0 0.45em 0 0; accent-color: #2ea043; cursor: pointer; transform: scale(1.1); }
+    body.has-completion-controls .completion-label { cursor: pointer; }
     body.has-completion-controls ul[data-section] { list-style: none; }
-    body.has-completion-controls .completion-checkbox { margin-left: -1.15em; }
+    body.has-completion-controls .completion-checkbox { display: inline-block; margin-left: -1.15em; }
+    #completion-toggle-label { cursor: pointer; }
+    #completion-toggle { accent-color: #2ea043; cursor: pointer; margin: 0 0.3em 0 0; vertical-align: -0.1em; }
+    body:not(.has-completion-controls) .completion-stats { display: none; }
+    .completion-stats { margin-left: 0.6em; }
     #reading-progress { font-size: 0.8em; margin: 0.65em 0 0 3.2em; color: #999; }
     #reading-progress[hidden], .pill[hidden] { display: none; }
     .local-storage-note { opacity: 0.65; margin-left: 0.35em; }
@@ -75,9 +79,12 @@
       <button class="pill sort-pill" data-sort="alpha">A→Z</button>
     </div>
     <div id="reading-progress" hidden>
-      <span id="reading-progress-text" aria-live="polite"></span>
-      <span class="local-storage-note">Saved only in this browser.</span>
-      <button type="button" id="clear-completed" hidden>Reset</button>
+      <label id="completion-toggle-label"><input type="checkbox" id="completion-toggle"> track your reading</label>
+      <span class="completion-stats">
+        <span id="reading-progress-text" aria-live="polite"></span>
+        <span class="local-storage-note">Saved only in this browser.</span>
+        <button type="button" id="clear-completed" hidden>Reset</button>
+      </span>
     </div>
   </div>
 
@@ -431,6 +438,7 @@
     var filters = { starred: null, award: null, completion: null };
     var currentSort = 'year-asc';
     var COMPLETED_STORAGE_KEY = 'books-for-indigo.completed.v1';
+    var COMPLETION_VISIBLE_KEY = 'books-for-indigo.completion-visible.v1';
     var completedBookIds = {};
     var canSaveCompleted = true;
 
@@ -519,10 +527,30 @@
           apply();
         });
       });
-      document.body.classList.add('has-completion-controls');
-      document.getElementById('show-uncompleted').hidden = false;
+      var toggle = document.getElementById('completion-toggle');
+      var visible = false;
+      try { visible = localStorage.getItem(COMPLETION_VISIBLE_KEY) === '1'; } catch (error) {}
+      toggle.checked = visible;
+      setCompletionTracking(visible);
+      toggle.addEventListener('change', function() {
+        setCompletionTracking(toggle.checked);
+        try { localStorage.setItem(COMPLETION_VISIBLE_KEY, toggle.checked ? '1' : '0'); } catch (error) {}
+      });
       document.getElementById('reading-progress').hidden = false;
       updateReadingProgress();
+    }
+
+    function setCompletionTracking(on) {
+      document.body.classList.toggle('has-completion-controls', on);
+      // Disabled checkboxes stop hidden label clicks from toggling completion
+      document.querySelectorAll('.completion-checkbox').forEach(function(cb) { cb.disabled = !on; });
+      var pill = document.getElementById('show-uncompleted');
+      pill.hidden = !on;
+      if (!on && filters.completion) {
+        filters.completion = null;
+        pill.classList.remove('on');
+      }
+      apply();
     }
 
     function apply() {

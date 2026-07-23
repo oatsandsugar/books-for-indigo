@@ -4,7 +4,7 @@ Books I've read to Indigo, hosted at [readingstori.es](https://readingstori.es).
 
 This is an incomplete list. The reading list remains usable without JavaScript; filtering, sorting, and the personal completion checklist are client-side enhancements.
 
-Completion state is stored only in the visitor's browser with `localStorage`. It is not sent anywhere or synced between devices.
+The completion checklist is off by default; the "track your reading" toggle above the list turns it on. Completion state is stored only in the visitor's browser with `localStorage`. It is not sent anywhere or synced between devices.
 
 **RSS feeds:** [All books](https://readingstori.es/feed.xml) · [Starred only](https://readingstori.es/starred.xml)
 
