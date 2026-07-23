@@ -528,8 +528,12 @@
         });
       });
       var toggle = document.getElementById('completion-toggle');
+      // Default on for visitors with saved completion data, unless they chose to hide it
       var visible = false;
-      try { visible = localStorage.getItem(COMPLETION_VISIBLE_KEY) === '1'; } catch (error) {}
+      try {
+        var savedPref = localStorage.getItem(COMPLETION_VISIBLE_KEY);
+        visible = savedPref === null ? Object.keys(completedBookIds).length > 0 : savedPref === '1';
+      } catch (error) {}
       toggle.checked = visible;
       setCompletionTracking(visible);
       toggle.addEventListener('change', function() {
