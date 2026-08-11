@@ -28,15 +28,10 @@ Award attributes (value = award year unless noted):
 | `data-newbery-honor` | Newbery Honor |
 | `data-greenaway-medal` | Kate Greenaway Medal |
 | `data-cbca-picture-book` | CBCA Picture Book of the Year |
-| `data-cbca-picture-book-highly-commended` | CBCA Picture Book Highly Commended |
+| `data-cbca-picture-book-highly-commended` | CBCA Picture Book Highly Commended / Honour |
+| `data-cbca-picture-book-shortlist` | CBCA Picture Book shortlist |
 | `data-cbca-early-childhood-shortlist` | CBCA Early Childhood shortlist |
 | `data-cbca-notable` | CBCA Notable |
-| `data-abia-picture-book-longlist` | ABIA Children's Picture Book longlist |
-| `data-abia-younger-children-winner` | ABIA Younger Children winner |
-| `data-abpa-design-commended` | ABPA Design Award Commended |
-| `data-indie-childrens-longlist` | Indie Book Awards Children's longlist |
-| `data-speech-pathology-shortlist` | Speech Pathology Book of the Year shortlist |
-| `data-yabba-hall-of-fame` | YABBA Hall of Fame |
 
 Awarded titles often also have a `title` tooltip on `<cite>` with human-readable award text.
 
@@ -91,6 +86,7 @@ document.querySelectorAll('li[data-nyt-illustrated]')
 document.querySelectorAll('li[data-newbery-medal], li[data-newbery-honor]')
 document.querySelectorAll('li[data-greenaway-medal]')
 document.querySelectorAll('li[data-cbca-picture-book], li[data-cbca-notable]')
+document.querySelectorAll('li[data-cbca-picture-book-highly-commended], li[data-cbca-picture-book-shortlist], li[data-cbca-early-childhood-shortlist]')
 
 // Any Caldecott (medal or honor)
 document.querySelectorAll('li[data-caldecott-medal], li[data-caldecott-honor]')
@@ -126,7 +122,8 @@ Object.entries(
     }, {})
 ).sort((a, b) => b[1] - a[1])[0];
 
-// Books peculiar to Indigo (starred, with no awards)
+// Starred books with no award attrs in our HTML (not the same as "won no awards";
+// tagging is incomplete, including for awards we do capture like CBCA)
 const NON_AWARD = new Set([
   'data-year', 'data-status', 'data-starred', 'data-review',
   'data-recommended', 'data-added', 'data-country', 'data-publisher'
