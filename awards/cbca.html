@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="Tracking progress through CBCA Picture Book of the Year winners (1956–2025). A visual checklist for Books for Indigo.">
-  <link rel="canonical" href="https://readingstori.es/cbca.html">
+  <link rel="canonical" href="https://readingstori.es/awards/cbca.html">
   <meta property="og:title" content="CBCA Picture Book Checklist — Books for Indigo">
   <meta property="og:description" content="Tracking progress through CBCA Picture Book of the Year winners (1956–2025). A visual checklist for Books for Indigo.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://readingstori.es/cbca.html">
+  <meta property="og:url" content="https://readingstori.es/awards/cbca.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏅</text></svg>">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../styles.css">
   <title>CBCA Picture Book Checklist — Books for Indigo</title>
   <style>
     .grid { grid-template-columns: 1.5em repeat(8, 1.8em); }
@@ -22,12 +22,12 @@
     <h1>CBCA Picture Book Checklist</h1>
   </header>
   <nav>
-    <p><a href="index.html">Books</a> · <a href="starred.html">Reviews</a> · <a href="correlations.html">Correlations</a> · <a href="about.html">About</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a></p>
+    <p><a href="../index.html">Books</a> · <a href="../starred.html">Reviews</a> · <a href="../correlations.html">Correlations</a> · <a href="../about.html">About</a> · <a href="https://github.com/oatsandsugar/books-for-indigo/issues/new">Suggest a book</a></p>
   </nav>
   <main>
   <p>The <a href="https://cbca.org.au/">CBCA Picture Book of the Year</a> has been awarded by the Children's Book Council of Australia since 1956. 56 books have won across 54 award years.</p>
   <p id="progress"><strong>Loading...</strong></p>
-  <noscript><p><small><em>JavaScript is needed to show read/starred status from the <a href="index.html">book list</a>.</em></small></p></noscript>
+  <noscript><p><small><em>JavaScript is needed to show read/starred status from the <a href="../index.html">book list</a>.</em></small></p></noscript>
 
   <div class="grid" role="img" aria-label="CBCA Picture Book of the Year reading progress grid, organized by decade">
     <!-- Header row -->
@@ -258,8 +258,8 @@
       <h3>Site</h3>
       <ul>
         <li><a href="https://github.com/oatsandsugar/books-for-indigo">Source</a></li>
-        <li><a href="feed.xml">RSS</a> · <a href="starred.xml">RSS (starred)</a></li>
-        <li><a href="sitemap.xml">Sitemap</a></li>
+        <li><a href="../feed.xml">RSS</a> · <a href="../starred.xml">RSS (starred)</a></li>
+        <li><a href="../sitemap.xml">Sitemap</a></li>
       </ul>
       <h3>Webring</h3>
       <ul>
@@ -269,7 +269,7 @@
     <div>
       <h3>Analytics</h3>
       <ul>
-        <li><a href="correlations.html">Correlations</a></li>
+        <li><a href="../correlations.html">Correlations</a></li>
         <li><a href="caldecott.html">Caldecott Medal</a></li>
         <li><a href="newbery.html">Newbery Medal</a></li>
         <li><a href="greenaway.html">Kate Greenaway Medal</a></li>
@@ -281,7 +281,7 @@
   </footer>
 
   <script>
-    fetch('index.html')
+    fetch('../index.html')
       .then(function(r) { return r.text(); })
       .then(function(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
