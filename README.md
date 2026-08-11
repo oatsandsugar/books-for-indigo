@@ -19,11 +19,11 @@ Got a recommendation? [Open an issue](https://github.com/oatsandsugar/books-for-
 
 ## Webring
 
-Looking for other nerdy parents who maintain personal sites or book lists — would love to start a webring. If that's you, [open an issue](https://github.com/oatsandsugar/books-for-indigo/issues/new?title=Webring%20-%20let%27s%20link%20up!&labels=webring&body=My%20homepage%3A%20)!
+Part of the [90s Internet Webring](https://90s-internet.com) ([random](https://90s-internet.com/#random) · [join](https://github.com/oatsandsugar/90s-internet/issues/new?title=Join%20the%20webring&labels=join)). Especially glad to link up with other nerdy parents running personal sites or book lists. Got a book recommendation? [Open an issue](https://github.com/oatsandsugar/books-for-indigo/issues/new)!
 
 ## Extracting data
 
-The HTML is structured for easy scraping with `querySelectorAll`:
+The HTML is structured for easy scraping with `querySelectorAll`. A couple of starters:
 
 ```js
 // All books
@@ -31,61 +31,9 @@ document.querySelectorAll('li[data-status]')
 
 // Starred favourites
 document.querySelectorAll('li[data-starred]')
-
-// Currently reading
-document.querySelectorAll('li[data-status="reading"]')
-
-// Books from a specific year
-document.querySelectorAll('li[data-year="2023"]')
-
-// Books from a decade (starts-with match)
-document.querySelectorAll('li[data-year^="199"]') // 1990s
-
-// All titles
-document.querySelectorAll('cite')
-
-// All authors/contributors
-document.querySelectorAll('.author')
-
-// Roles (Author, Illustrator, Compiler, etc.)
-document.querySelectorAll('.role')
-
-// Caldecott Medal winners
-document.querySelectorAll('li[data-caldecott-medal]')
-
-// Caldecott Honor books
-document.querySelectorAll('li[data-caldecott-honor]')
-
-// NYT Best Illustrated
-document.querySelectorAll('li[data-nyt-illustrated]')
-
-// Any Caldecott (medal or honor)
-document.querySelectorAll('li[data-caldecott-medal], li[data-caldecott-honor]')
-
-// Titles of all Caldecott honorees from the 1990s
-[...document.querySelectorAll('li[data-caldecott-honor][data-year^="199"]')]
-  .map(li => li.querySelector('cite').textContent)
-
-// Caldecott Medal years you've read
-[...document.querySelectorAll('li[data-caldecott-medal]')]
-  .map(li => li.dataset.caldecottMedal).sort()
-
-// Caldecott Medal years you're missing
-const read = new Set([...document.querySelectorAll('li[data-caldecott-medal]')]
-  .map(li => li.dataset.caldecottMedal));
-Array.from({length: 2026-1938+1}, (_, i) => String(1938+i))
-  .filter(y => !read.has(y))
-
-// Decade with the most starred books
-Object.entries(
-  [...document.querySelectorAll('li[data-starred]')]
-    .reduce((acc, li) => {
-      const d = Math.floor(li.dataset.year / 10) * 10 + 's';
-      acc[d] = (acc[d] || 0) + 1;
-      return acc;
-    }, {})
-).sort((a, b) => b[1] - a[1])[0]
 ```
+
+Full attribute list, award selectors, and more snippets: [selectors.md](selectors.md).
 
 ## Formerly Featured Quotes
 
