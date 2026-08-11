@@ -14,7 +14,8 @@ Repo: github.com/oatsandsugar/books-for-indigo
 - `feed.xml` — RSS feed of all recently added books. Updated manually when books are added.
 - `starred.xml` — RSS feed of starred (⭐) books only. Updated manually when starred books are added.
 - `sitemap.xml` — Human-readable sitemap.
-- `README.md` — project meta, conventions, querySelectorAll extraction docs, formerly featured quotes.
+- `README.md` — project meta, conventions, formerly featured quotes. Selector examples live in `selectors.md`.
+- `selectors.md` — full `querySelectorAll` reference for scraping the book list.
 - `CNAME` — custom domain (`readingstori.es`).
 - `LICENSE` — MIT License.
 
