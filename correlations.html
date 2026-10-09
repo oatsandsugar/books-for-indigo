@@ -59,9 +59,14 @@
     .viz-controls button { border: 1px solid #8886; padding: 0.35em 0.7em; border-radius: 3px; }
     .viz-controls button[aria-pressed="true"] { border-color: currentColor; font-weight: bold; }
     #geo svg { display: block; width: 100%; height: auto; }
-    .map-country { stroke: #fff; stroke-width: 0.6; vector-effect: non-scaling-stroke; }
+    .map-country { stroke: #fff; stroke-width: 0.6; vector-effect: non-scaling-stroke; transition: filter 140ms ease; }
     .map-country[role="button"] { cursor: pointer; }
-    .map-country[role="button"]:hover, .map-country:focus, .map-country.selected { stroke: #222; stroke-width: 1.8; outline: none; }
+    .map-country[role="button"]:hover, .map-country.selected { filter: brightness(0.9); }
+    .map-country:focus { outline: none; }
+    .map-country:focus-visible { stroke: #222; stroke-width: 1.8; }
+    @media (prefers-reduced-motion: reduce) {
+      .map-country { transition: none; }
+    }
     #geo-summary { min-height: 1.6em; margin: 0.5em 0; font-size: 0.85em; }
     .map-legend { display: flex; flex-wrap: wrap; gap: 1em; font-size: 0.75em; justify-content: center; }
     .map-legend span { display: inline-flex; align-items: center; gap: 0.35em; }
@@ -82,7 +87,7 @@
     }
     @media (prefers-color-scheme: dark) {
       .map-country { stroke: #222; }
-      .map-country[role="button"]:hover, .map-country:focus, .map-country.selected { stroke: #fff; }
+      .map-country:focus-visible { stroke: #fff; }
       .viz-controls option { background: #222; }
     }
   </style>
