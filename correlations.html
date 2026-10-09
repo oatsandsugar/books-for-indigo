@@ -55,7 +55,7 @@
     .author-books li { margin-bottom: 0.4em; }
     .viz-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6em; margin: 0.8em 0; font-size: 0.8em; }
     .viz-controls select { max-width: 100%; font: inherit; color: inherit; background: transparent; padding: 0.3em; }
-    .viz-controls button { font: inherit; color: inherit; background: transparent; cursor: pointer; }
+    .viz-controls button, .publisher-row { font: inherit; color: inherit; background: transparent; cursor: pointer; }
     .viz-controls button { border: 1px solid #8886; padding: 0.35em 0.7em; border-radius: 3px; }
     .viz-controls button[aria-pressed="true"] { border-color: currentColor; font-weight: bold; }
     #geo svg { display: block; width: 100%; height: auto; }
@@ -79,19 +79,21 @@
     .viz-book-list { font-size: 0.85em; }
     .viz-book-list ul { columns: 2; padding-left: 1.4em; }
     .viz-book-list li { break-inside: avoid; margin-bottom: 0.35em; }
-    #publisher-picker { font-size: 0.8em; margin: 1em 0; }
-    #publisher-picker summary { cursor: pointer; }
-    #publisher-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8em; margin-top: 1em; }
-    #publisher-choices label { display: flex; flex-direction: column; gap: 0.3em; min-width: 0; }
-    #publisher-choices select { width: 100%; font: inherit; padding: 0.3em; color: inherit; background: transparent; }
-    #mongo.publisher-diagram svg { height: auto; }
+    .publisher-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) 6.5em; align-items: center; gap: 0.8em; width: 100%; border: 0; text-align: left; padding: 0.5em 0; font-size: 0.8em; }
+    .publisher-row:hover, .publisher-row:focus-visible { background: #8881; }
+    .publisher-track { height: 0.85em; position: relative; }
+    .publisher-total, .publisher-stars { position: absolute; left: 0; top: 0; height: 100%; border-radius: 2px; }
+    .publisher-total { background: #4a90d9; opacity: 0.65; }
+    .publisher-stars { background: #d4a017; }
+    .publisher-count { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
     @media (max-width: 600px) {
       .viz-book-list ul { columns: 1; }
+      .publisher-row { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 6em; gap: 0.5em; }
     }
     @media (prefers-color-scheme: dark) {
       .map-country { stroke: #222; }
       .map-country:focus-visible { stroke: #fff; }
-      .viz-controls option, #publisher-choices option { background: #222; }
+      .viz-controls option { background: #222; }
     }
   </style>
 </head>
@@ -117,16 +119,8 @@
   <div id="histogram"></div>
   <div id="hist-stats"></div>
 
-  <h2 id="diagram-heading">Awards and stars</h2>
-  <div class="viz-controls">
-    <label for="diagram-mode">Compare</label>
-    <select id="diagram-mode"><option value="awards">Awards and stars</option><option value="publishers">Publishers and stars</option></select>
-  </div>
-  <details id="publisher-picker" hidden>
-    <summary>Choose publishers</summary>
-    <div id="publisher-choices"></div>
-  </details>
-  <p id="diagram-note" class="table-note">Circle areas proportional to set sizes.</p>
+  <h2>All Awards &cap; Stars</h2>
+  <p>Circle areas proportional to set sizes.</p>
   <div id="mongo"></div>
   <div id="mongo-book-list"></div>
 
@@ -151,6 +145,18 @@
   <div id="geo-legend" class="map-legend"></div>
   <p class="table-note">Map: <a href="https://www.naturalearthdata.com/">Natural Earth</a>.</p>
   <div id="geo-list" class="viz-book-list"></div>
+
+  <h2>Publishers</h2>
+  <p class="table-note">Original publishers and imprints, kept separate. Blue shows all books; gold shows starred books.</p>
+  <div class="viz-controls">
+    <label for="publisher-sort">Rank by</label>
+    <select id="publisher-sort"><option value="books">Most books</option><option value="stars">Most starred</option></select>
+    <label for="publisher-select">Publisher</label>
+    <select id="publisher-select"><option value="">Choose a publisher</option></select>
+  </div>
+  <div id="publishers"></div>
+  <p id="publisher-summary" class="table-note"></p>
+  <div id="publisher-list" class="viz-book-list"></div>
 
   </main>
   <footer>
@@ -526,16 +532,13 @@
         '</table>';
     }
 
-    function buildMongoDiagram(doc, groups, publisherMode) {
-      document.getElementById('mongo').replaceChildren();
-      document.getElementById('mongo').classList.toggle('publisher-diagram', publisherMode);
-      document.getElementById('mongo-controls').replaceChildren();
+    function buildMongoDiagram(doc) {
       var allBooks = doc.querySelectorAll('li[data-status]');
 
       // Define all sets including Stars
       var SETS = [
         { key: 'stars', label: 'Starred', color: STAR_COLOR, test: function(li) { return li.hasAttribute('data-starred'); } }
-      ].concat(groups);
+      ].concat(AWARDS);
 
       var n = SETS.length;
 
@@ -604,89 +607,67 @@
         return { x: cx + layoutR * Math.cos(angle), y: cy + layoutR * Math.sin(angle) };
       });
 
-      if (publisherMode) {
-        pos[0] = { x: cx, y: cy };
-        for (var i = 1; i < n; i++) {
-          var angle = 2 * Math.PI * (i - 1) / Math.max(n - 1, 1) - Math.PI / 2;
-          var distance = pairCount[0][i] === members[SETS[i].key].length ? Math.max(0, radii[0] - radii[i] - 4) : targetDist[0][i];
-          if (!pairCount[0][i]) distance += 8;
-          pos[i] = { x: cx + distance * Math.cos(angle), y: cy + distance * Math.sin(angle) };
-        }
-      } else {
-        // Stress minimisation
-        for (var iter = 0; iter < 300; iter++) {
-          var lr = 0.1 * (1 - iter / 300);
-          for (var i = 0; i < n; i++) {
-            var fx = 0, fy = 0;
-            for (var j = 0; j < n; j++) {
-              if (i === j) continue;
-              var dx = pos[i].x - pos[j].x;
-              var dy = pos[i].y - pos[j].y;
-              var d = Math.sqrt(dx * dx + dy * dy) || 0.1;
-              var td = targetDist[i][j];
-              var force = (d - td) / d;
-              fx -= lr * force * dx;
-              fy -= lr * force * dy;
-            }
-            pos[i].x += fx;
-            pos[i].y += fy;
+      // Stress minimisation
+      for (var iter = 0; iter < 300; iter++) {
+        var lr = 0.1 * (1 - iter / 300);
+        for (var i = 0; i < n; i++) {
+          var fx = 0, fy = 0;
+          for (var j = 0; j < n; j++) {
+            if (i === j) continue;
+            var dx = pos[i].x - pos[j].x;
+            var dy = pos[i].y - pos[j].y;
+            var d = Math.sqrt(dx * dx + dy * dy) || 0.1;
+            var td = targetDist[i][j];
+            var force = (d - td) / d;
+            fx -= lr * force * dx;
+            fy -= lr * force * dy;
           }
-          var avgX = 0, avgY = 0;
-          pos.forEach(function(p) { avgX += p.x; avgY += p.y; });
-          avgX /= n; avgY /= n;
-          pos.forEach(function(p) { p.x += cx - avgX; p.y += cy - avgY; });
+          pos[i].x += fx;
+          pos[i].y += fy;
         }
+        var avgX = 0, avgY = 0;
+        pos.forEach(function(p) { avgX += p.x; avgY += p.y; });
+        avgX /= n; avgY /= n;
+        pos.forEach(function(p) { p.x += cx - avgX; p.y += cy - avgY; });
+      }
 
-        // Post-process: enforce separation for zero-overlap pairs
-        for (var pass = 0; pass < 50; pass++) {
-          for (var i = 0; i < n; i++) {
-            for (var j = i + 1; j < n; j++) {
-              if (pairCount[i][j] > 0) continue; // they should overlap, skip
-              var dx = pos[j].x - pos[i].x;
-              var dy = pos[j].y - pos[i].y;
-              var d = Math.sqrt(dx * dx + dy * dy) || 0.1;
-              var minDist = radii[i] + radii[j] + 2;
-              if (d < minDist) {
-                var push = (minDist - d) / 2;
-                var nx = dx / d, ny = dy / d;
-                pos[i].x -= push * nx;
-                pos[i].y -= push * ny;
-                pos[j].x += push * nx;
-                pos[j].y += push * ny;
-              }
+      // Post-process: enforce separation for zero-overlap pairs
+      for (var pass = 0; pass < 50; pass++) {
+        for (var i = 0; i < n; i++) {
+          for (var j = i + 1; j < n; j++) {
+            if (pairCount[i][j] > 0) continue; // they should overlap, skip
+            var dx = pos[j].x - pos[i].x;
+            var dy = pos[j].y - pos[i].y;
+            var d = Math.sqrt(dx * dx + dy * dy) || 0.1;
+            var minDist = radii[i] + radii[j] + 2;
+            if (d < minDist) {
+              var push = (minDist - d) / 2;
+              var nx = dx / d, ny = dy / d;
+              pos[i].x -= push * nx;
+              pos[i].y -= push * ny;
+              pos[j].x += push * nx;
+              pos[j].y += push * ny;
             }
           }
         }
-
       }
 
       // Order for drawing + label placement (largest circle first / bottom)
       var order = SETS.map(function(_, i) { return i; });
       order.sort(function(a, b) { return radii[b] - radii[a]; });
 
-      function labelLines(i) {
-        var label = SETS[i].label.toUpperCase() + '  ' + members[SETS[i].key].length;
-        if (!publisherMode) return [label];
-        var lines = [''];
-        label.split(' ').forEach(function(word) {
-          var last = lines.length - 1;
-          if (lines[last] && lines[last].length + word.length > 24) lines.push(word);
-          else lines[last] += (lines[last] ? ' ' : '') + word;
-        });
-        return lines;
-      }
       // Pre-compute label anchor positions (in circle-coordinate space),
       // with collision-nudging, so the bounding box can accommodate them.
       var labelPositions = order.slice().reverse().map(function(i) {
-        return { i: i, cx: pos[i].x, cy: pos[i].y, r: radii[i], x: pos[i].x, y: pos[i].y - radii[i] - 12 - (labelLines(i).length - 1) * 12 };
+        return { i: i, cx: pos[i].x, cy: pos[i].y, r: radii[i], x: pos[i].x, y: pos[i].y - radii[i] - 12 };
       });
       labelPositions.sort(function(a, b) { return a.x - b.x; });
       for (var pass = 0; pass < 8; pass++) {
         for (var a = 0; a < labelPositions.length; a++) {
           for (var b = a + 1; b < labelPositions.length; b++) {
             var la = labelPositions[a], lb = labelPositions[b];
-            if (Math.abs(la.x - lb.x) < (publisherMode ? 170 : 90) && Math.abs(la.y - lb.y) < (publisherMode ? 40 : 16)) {
-              (la.y < lb.y ? la : lb).y -= publisherMode ? 42 : 18;
+            if (Math.abs(la.x - lb.x) < 90 && Math.abs(la.y - lb.y) < 16) {
+              (la.y < lb.y ? la : lb).y -= 18;
             }
           }
         }
@@ -701,8 +682,8 @@
         maxY = Math.max(maxY, p.y + radii[i]);
       });
       labelPositions.forEach(function(lp) {
-        minX = Math.min(minX, lp.x - (publisherMode ? 90 : 50));
-        maxX = Math.max(maxX, lp.x + (publisherMode ? 90 : 50));
+        minX = Math.min(minX, lp.x - 50);
+        maxX = Math.max(maxX, lp.x + 50);
         minY = Math.min(minY, lp.y - 6);
       });
       var pad = 24;
@@ -745,7 +726,7 @@
         line.setAttribute('x1', lp.cx + offsetX);
         line.setAttribute('y1', lp.cy + offsetY - lp.r);
         line.setAttribute('x2', lp.x + offsetX);
-        line.setAttribute('y2', lp.y + offsetY + (labelLines(lp.i).length - 1) * 12 + 3);
+        line.setAttribute('y2', lp.y + offsetY + 3);
         line.setAttribute('stroke', s.color);
         line.setAttribute('stroke-width', '1');
         line.setAttribute('stroke-opacity', '0.5');
@@ -762,13 +743,7 @@
         text.setAttribute('font-weight', '600');
         text.setAttribute('letter-spacing', '0.04em');
         text.setAttribute('pointer-events', 'none');
-        labelLines(lp.i).forEach(function(label, index) {
-          var span = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-          span.setAttribute('x', lp.x + offsetX);
-          span.setAttribute('dy', index ? '12' : '0');
-          span.textContent = label;
-          text.appendChild(span);
-        });
+        text.textContent = s.label.toUpperCase() + '  ' + members[s.key].length;
         svg.appendChild(text);
       });
 
@@ -976,7 +951,6 @@
         }
         listEl.innerHTML = html;
       }
-      updateSelector();
     }
 
     function renderBookList(target, label, books) {
@@ -1179,60 +1153,73 @@
       });
     }
 
-    function buildDiagramExplorer(doc) {
+    function buildPublishers(doc) {
+      var books = Array.from(doc.querySelectorAll('li[data-status]'));
       var publishers = {};
-      doc.querySelectorAll('li[data-status][data-publisher]').forEach(function(book) {
+      var unknown = 0;
+      books.forEach(function(book) {
         var name = book.getAttribute('data-publisher');
-        if (!publishers[name]) publishers[name] = { count: 0, stars: 0 };
-        publishers[name].count++;
+        if (!name) { unknown++; return; }
+        if (!publishers[name]) publishers[name] = { books: [], stars: 0 };
+        publishers[name].books.push(book);
         if (book.hasAttribute('data-starred')) publishers[name].stars++;
       });
-      var names = Object.keys(publishers).sort(function(a, b) { return a.localeCompare(b); });
-      var selected = names.slice().sort(function(a, b) {
-        return publishers[b].stars - publishers[a].stars || publishers[b].count - publishers[a].count || a.localeCompare(b);
-      }).slice(0, 5);
-      var mode = document.getElementById('diagram-mode');
-      var selectors = [];
-      for (var i = 0; i < 5; i++) {
-        var label = document.createElement('label');
-        label.textContent = 'Publisher ' + (i + 1);
-        var select = document.createElement('select');
-        select.setAttribute('aria-label', 'Publisher ' + (i + 1));
-        var empty = document.createElement('option');
-        empty.value = '';
-        empty.textContent = 'None';
-        select.appendChild(empty);
-        names.forEach(function(name) {
-          var option = document.createElement('option');
-          option.value = name;
-          option.textContent = name + ' (' + publishers[name].count + ' books, ' + publishers[name].stars + ' starred)';
-          select.appendChild(option);
-        });
-        select.value = selected[i] || '';
-        select.addEventListener('change', render);
-        label.appendChild(select);
-        document.getElementById('publisher-choices').appendChild(label);
-        selectors.push(select);
+      var selector = document.getElementById('publisher-select');
+      var sort = document.getElementById('publisher-sort');
+      var names = Object.keys(publishers);
+      names.sort(function(a, b) { return a.localeCompare(b); }).forEach(function(name) {
+        var option = document.createElement('option');
+        option.value = name;
+        option.textContent = name + ' (' + publishers[name].books.length + ')';
+        selector.appendChild(option);
+      });
+      function choose(name) {
+        selector.value = name;
+        var list = document.getElementById('publisher-list');
+        if (name) renderBookList(list, name, publishers[name].books);
+        else list.replaceChildren();
       }
+      selector.addEventListener('change', function() { choose(selector.value); });
       function render() {
-        var publisherMode = mode.value === 'publishers';
-        selected = selectors.map(function(select) { return select.value; }).filter(Boolean);
-        selectors.forEach(function(select) {
-          Array.from(select.options).forEach(function(option) {
-            option.disabled = !!option.value && option.value !== select.value && selected.indexOf(option.value) !== -1;
+        var sorted = names.slice().sort(function(a, b) {
+          var x = publishers[a], y = publishers[b];
+          return (sort.value === 'stars' ? y.stars - x.stars : y.books.length - x.books.length) ||
+            y.books.length - x.books.length || a.localeCompare(b);
+        }).slice(0, 12);
+        var max = Math.max.apply(null, sorted.map(function(name) { return publishers[name].books.length; }).concat([1]));
+        var chart = document.getElementById('publishers');
+        chart.replaceChildren();
+        sorted.forEach(function(name) {
+          var entry = publishers[name];
+          var row = document.createElement('button');
+          row.type = 'button';
+          row.className = 'publisher-row';
+          row.setAttribute('aria-label', name + ': ' + entry.books.length + ' books, ' + entry.stars + ' starred. Show books.');
+          var label = document.createElement('span');
+          label.textContent = name;
+          row.appendChild(label);
+          var track = document.createElement('span');
+          track.className = 'publisher-track';
+          track.setAttribute('aria-hidden', 'true');
+          [['publisher-total', entry.books.length], ['publisher-stars', entry.stars]].forEach(function(part) {
+            var bar = document.createElement('span');
+            bar.className = part[0];
+            bar.style.width = (part[1] / max * 100) + '%';
+            track.appendChild(bar);
           });
+          row.appendChild(track);
+          var count = document.createElement('span');
+          count.className = 'publisher-count';
+          count.textContent = entry.books.length + ' · ' + entry.stars + ' ⭐';
+          row.appendChild(count);
+          row.addEventListener('click', function() { choose(name); });
+          chart.appendChild(row);
         });
-        document.getElementById('publisher-picker').hidden = !publisherMode;
-        document.getElementById('diagram-heading').textContent = publisherMode ? 'Publishers and stars' : 'Awards and stars';
-        document.getElementById('diagram-note').textContent = publisherMode ?
-          'Circle areas show book counts; overlaps show starred books. Publishers and imprints stay separate. Use the filters above to explore the books. The initial five have the most stars.' :
-          'Circle areas proportional to set sizes.';
-        var groups = publisherMode ? selected.map(function(name, i) {
-          return { key: 'publisher-' + i, label: name, color: PALETTE[i], test: function(book) { return book.getAttribute('data-publisher') === name; } };
-        }) : AWARDS;
-        buildMongoDiagram(doc, groups, publisherMode);
+        document.getElementById('publisher-summary').textContent = 'Top ' + sorted.length + ' of ' + names.length +
+          ' publishers and imprints. ' + (books.length - unknown) + ' books with publisher details' +
+          (unknown ? '; ' + unknown + ' unknown' : '') + '. Select a bar or choose any publisher above.';
       }
-      mode.addEventListener('change', render);
+      sort.addEventListener('change', render);
       render();
     }
 
@@ -1361,10 +1348,11 @@
         });
 
         buildHistogram(doc);
-        buildDiagramExplorer(doc);
+        buildMongoDiagram(doc);
         buildAwardTable(allBooks);
         buildAuthors(doc);
         buildGeo(doc);
+        buildPublishers(doc);
 
 
       });
