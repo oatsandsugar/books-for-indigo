@@ -31,7 +31,9 @@ Each book is a `<li>` with:
 - `data-caldecott-medal` — Caldecott Medal year (value = award year)
 - `data-caldecott-honor` — Caldecott Honor year (value = award year)
 - `data-nyt-illustrated` — NYT Best Illustrated year (value = award year)
-- `data-publisher` — original publisher name
+- `data-publisher` — original publisher name (preserve independently of the edition read)
+- `data-edition-publisher` — optional publisher of the edition actually read; require evidence about the reader’s copy, record it in `data/edition-publishers.json`, and leave unknown values absent. Never infer this field from the original publisher or a title-only catalogue match. Both publisher attributes are non-award metadata.
+- Reuse the canonical publisher names in README.md. Normalize equivalent spellings; do not combine distinct imprints or historical publishers merely because they share an owner.
 - `data-recommended` — boolean attribute for community-recommended books (from GitHub issues)
 - `data-added` — date the book was added to the list (YYYY-MM-DD, approximate — based on commit date). JS shows a "NEW" badge for books added within the last 2 weeks.
 

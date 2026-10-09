@@ -89,7 +89,7 @@
 
     function hasAnyAward(li) {
       return Array.prototype.some.call(li.attributes, function(a) {
-        return a.name.indexOf('data-') === 0 && SKIP_ATTRS.indexOf(a.name) === -1;
+        return a.name.indexOf('data-') === 0 && SKIP_ATTRS.concat(['data-publisher', 'data-edition-publisher']).indexOf(a.name) === -1;
       });
     }
 
@@ -132,6 +132,9 @@
               var name = a.name.replace(/^data-/, '').split('-').map(function(w) {
                 return w.length <= 4 ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1);
               }).join(' ');
+              if (a.name === 'data-publisher' && li.hasAttribute('data-edition-publisher')) return;
+              if (a.name === 'data-publisher') name = 'Publisher';
+              if (a.name === 'data-edition-publisher') name = 'Publisher';
               awards.push(name + (a.value ? ' ' + a.value : ''));
             });
             var awardsText = awards.join(' · ');

@@ -9,3 +9,7 @@ To rebuild after downloading the source GeoJSON:
 ```sh
 python3 scripts/build-world-map.py /path/to/ne_110m_admin_0_countries.geojson
 ```
+
+## Edition evidence
+
+`edition-publishers.json` documents evidence for each `data-edition-publisher` in `index.html`. Photo references identify the user-provided cover images; the photographs themselves are not published here. Preserve original publisher metadata. Add edition records only when evidence identifies the copy read, not merely another available edition.

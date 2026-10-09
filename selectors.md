@@ -14,6 +14,7 @@ Each book is an `<li>` with:
 | `data-added` | Date added to the list (`YYYY-MM-DD`) |
 | `data-country` | ISO country code for the work's origin |
 | `data-publisher` | Original publisher |
+| `data-edition-publisher` | Confirmed publisher of the edition read; absent if unknown |
 | `data-recommended` | Boolean; recommended via a GitHub issue |
 | `data-review` | Short review text (when present) |
 
@@ -126,7 +127,7 @@ Object.entries(
 // tagging is incomplete, including for awards we do capture like CBCA)
 const NON_AWARD = new Set([
   'data-year', 'data-status', 'data-starred', 'data-review',
-  'data-recommended', 'data-added', 'data-country', 'data-publisher'
+  'data-recommended', 'data-added', 'data-country', 'data-publisher', 'data-edition-publisher'
 ]);
 [...document.querySelectorAll('li[data-starred]')]
   .filter(li => ![...li.attributes].some(a =>

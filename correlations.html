@@ -85,6 +85,7 @@
     .publisher-total, .publisher-stars { position: absolute; left: 0; top: 0; height: 100%; border-radius: 2px; }
     .publisher-total { background: #4a90d9; opacity: 0.65; }
     .publisher-stars { background: #d4a017; }
+    .publisher-rate { display: block; font-size: 0.85em; opacity: 0.7; }
     .publisher-count { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
     @media (max-width: 600px) {
       .viz-book-list ul { columns: 1; }
@@ -143,16 +144,14 @@
   <p id="award-note" class="table-note"></p>
 
   <h2>Publishers</h2>
-  <p class="table-note">Original publishers and imprints, kept separate. Blue shows all books; gold shows starred books.</p>
-  <div class="viz-controls">
-    <label for="publisher-sort">Rank by</label>
-    <select id="publisher-sort"><option value="books">Most books</option><option value="stars">Most starred</option></select>
-    <label for="publisher-select">Publisher</label>
-    <select id="publisher-select"><option value="">Choose a publisher</option></select>
+  <p class="table-note">Edition publisher where known; otherwise the original publisher. Blue shows all books; gold shows starred books.</p>
+  <div id="publisher-sort" class="viz-controls" role="group" aria-label="Rank publishers by">
+    <button type="button" data-sort="books" aria-pressed="true">Most books</button>
+    <button type="button" data-sort="stars" aria-pressed="false">Most starred</button>
   </div>
   <div id="publishers"></div>
   <p id="publisher-summary" class="table-note"></p>
-  <div id="publisher-list" class="viz-book-list"></div>
+  <div id="publisher-list" class="viz-book-list" aria-live="polite"></div>
 
   <h2>Authors</h2>
   <p class="table-note">Includes illustrators and other credited contributors. Select a name to see the books.</p>
@@ -194,7 +193,7 @@
     // Structural attributes to exclude from award auto-discovery.
     // data-publisher is on every book, so comparing "Publisher" to "Starred" is
     // tautological — it's just the starred base rate projected onto every book.
-    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country', 'data-publisher'];
+    var SKIP_ATTRS = ['data-year', 'data-status', 'data-starred', 'data-review', 'data-recommended', 'data-added', 'data-country', 'data-publisher', 'data-edition-publisher'];
     // Awards with fewer members than this are dropped from auto-discovery.
     // A Venn of n=1 carries no signal; it just clutters the chart.
     var MIN_AWARD_COUNT = 2;
@@ -1155,35 +1154,26 @@
 
     function buildPublishers(doc) {
       var books = Array.from(doc.querySelectorAll('li[data-status]'));
-      var publishers = {};
+      var publishers = Object.create(null);
       var unknown = 0;
       books.forEach(function(book) {
-        var name = book.getAttribute('data-publisher');
+        var name = book.getAttribute('data-edition-publisher') || book.getAttribute('data-publisher');
         if (!name) { unknown++; return; }
         if (!publishers[name]) publishers[name] = { books: [], stars: 0 };
         publishers[name].books.push(book);
         if (book.hasAttribute('data-starred')) publishers[name].stars++;
       });
-      var selector = document.getElementById('publisher-select');
-      var sort = document.getElementById('publisher-sort');
+      var sortBy = 'books';
+      var sortButtons = document.querySelectorAll('#publisher-sort button');
       var names = Object.keys(publishers);
-      names.sort(function(a, b) { return a.localeCompare(b); }).forEach(function(name) {
-        var option = document.createElement('option');
-        option.value = name;
-        option.textContent = name + ' (' + publishers[name].books.length + ')';
-        selector.appendChild(option);
-      });
       function choose(name) {
-        selector.value = name;
-        var list = document.getElementById('publisher-list');
-        if (name) renderBookList(list, name, publishers[name].books);
-        else list.replaceChildren();
+        renderBookList(document.getElementById('publisher-list'), name, publishers[name].books);
       }
-      selector.addEventListener('change', function() { choose(selector.value); });
       function render() {
-        var sorted = names.slice().sort(function(a, b) {
+        var eligible = names.filter(function(name) { return publishers[name].books.length >= 3; });
+        var sorted = eligible.slice().sort(function(a, b) {
           var x = publishers[a], y = publishers[b];
-          return (sort.value === 'stars' ? y.stars - x.stars : y.books.length - x.books.length) ||
+          return (sortBy === 'stars' ? y.stars - x.stars : y.books.length - x.books.length) ||
             y.books.length - x.books.length || a.localeCompare(b);
         }).slice(0, 12);
         var max = Math.max.apply(null, sorted.map(function(name) { return publishers[name].books.length; }).concat([1]));
@@ -1211,15 +1201,28 @@
           var count = document.createElement('span');
           count.className = 'publisher-count';
           count.textContent = entry.books.length + ' · ' + entry.stars + ' ⭐';
+          var rate = document.createElement('span');
+          rate.className = 'publisher-rate';
+          rate.textContent = (entry.stars / entry.books.length * 100).toFixed(1) + '% starred';
+          count.appendChild(rate);
           row.appendChild(count);
           row.addEventListener('click', function() { choose(name); });
           chart.appendChild(row);
         });
-        document.getElementById('publisher-summary').textContent = 'Top ' + sorted.length + ' of ' + names.length +
-          ' publishers and imprints. ' + (books.length - unknown) + ' books with publisher details' +
-          (unknown ? '; ' + unknown + ' unknown' : '') + '. Select a bar or choose any publisher above.';
+        if (!sorted.length) chart.textContent = 'No publishers have at least 3 books yet.';
+        document.getElementById('publisher-summary').textContent = 'Showing ' + sorted.length + ' of ' + eligible.length +
+          ' publishers with at least 3 books. ' + (books.length - unknown) + ' books with publisher details' +
+          (unknown ? '; ' + unknown + ' unknown' : '') + '. Click a publisher to see its books.';
       }
-      sort.addEventListener('change', render);
+      sortButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+          sortBy = button.getAttribute('data-sort');
+          sortButtons.forEach(function(option) {
+            option.setAttribute('aria-pressed', String(option === button));
+          });
+          render();
+        });
+      });
       render();
     }
 
