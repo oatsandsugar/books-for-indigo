@@ -1001,7 +1001,7 @@
           (counted.length > known.length ? ' · ' + (counted.length - known.length) + ' with unknown origin' : '');
       }
       function choose(code) {
-        selector.value = code;
+        selector.value = selector.value === code ? '' : code;
         update();
       }
       Object.keys(countries).sort(function(a, b) { return names.of(a).localeCompare(names.of(b)); }).forEach(function(code) {
