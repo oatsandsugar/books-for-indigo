@@ -8,7 +8,7 @@ Each book is an `<li>` with:
 
 | Attribute | Meaning |
 | --- | --- |
-| `data-year` | Publication year (or best-guess for ancient texts, e.g. `-500`) |
+| `data-year` | First publication year; `unknown` when unconfirmed (or best-guess for ancient texts, e.g. `-500`) |
 | `data-status` | `"read"` or `"reading"` |
 | `data-starred` | Boolean; favourites (shown as ⭐) |
 | `data-added` | Date added to the list (`YYYY-MM-DD`) |

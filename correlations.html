@@ -492,7 +492,7 @@
 
       allBooks.forEach(function(li) {
         var year = parseInt(li.getAttribute('data-year'), 10);
-        if (year < 1850) return;
+        if (isNaN(year) || year < 1850) return;
         var starred = li.hasAttribute('data-starred');
         var title = getTitle(li);
         if (!byYear[year]) byYear[year] = [];
@@ -627,7 +627,7 @@
       var points = [];
       allBooks.forEach(function(li) {
         var yr = parseInt(li.getAttribute('data-year'), 10);
-        if (yr < 1850) return;
+        if (isNaN(yr) || yr < 1850) return;
         points.push({ year: yr, starred: li.hasAttribute('data-starred') ? 1 : 0 });
       });
 
