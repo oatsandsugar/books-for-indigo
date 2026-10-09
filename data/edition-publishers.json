@@ -1,0 +1,108 @@
+{
+  "policy": "Edition overrides supported by user instructions or copy-specific evidence. Original publishers remain in data-publisher; analytics use the edition override when present, otherwise the original publisher. Photo files are not published.",
+  "books": [
+    {
+      "title": "My First Signs",
+      "publisher": "Child's Play",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1871.HEIC"
+    },
+    {
+      "title": "Penny and Pup",
+      "publisher": "Little Tiger Press",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1894.HEIC"
+    },
+    {
+      "title": "Warnayarra the Rainbow Snake",
+      "publisher": "Scholastic",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1905.HEIC"
+    },
+    {
+      "title": "How the Kangaroos Got Their Tails",
+      "publisher": "Scholastic",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1988.HEIC"
+    },
+    {
+      "title": "When the Snake Bites the Sun",
+      "publisher": "Scholastic",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1989.HEIC"
+    },
+    {
+      "title": "How the Birds Got Their Colours",
+      "publisher": "Scholastic",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1990.HEIC"
+    },
+    {
+      "title": "The Echidna and the Shade Tree",
+      "publisher": "Scholastic",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1991.HEIC"
+    },
+    {
+      "title": "The Dinky Donkey",
+      "publisher": "Scholastic",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1993.HEIC"
+    },
+    {
+      "title": "One of a Kind: A Story About Sorting and Classifying",
+      "publisher": "Walker Studio",
+      "confirmed": "2026-10-09",
+      "evidence": "Publisher visible on user-supplied cover photo IMG_1925.HEIC"
+    },
+    {
+      "title": "Sleepy Stories",
+      "publisher": "Elsewhere Editions",
+      "confirmed": "2026-10-09",
+      "evidence": "User identified the edition sold by NYRB; the 2021 English edition is published by Elsewhere Editions.",
+      "source": "https://elsewhereeditions.org/wp-content/uploads/2020_21_Catalog_Digital.pdf"
+    },
+    {
+      "title": "Arm in Arm",
+      "publisher": "NYR Children's Collection",
+      "confirmed": "2026-10-09",
+      "evidence": "User directed use of the NYRB editions discussed for Arm in Arm and D’Aulaires’ Book of Norse Myths. Exact printing not recorded.",
+      "source": "https://www.penguinrandomhouse.com/books/643776/arm-in-arm-by-remy-charlip/"
+    },
+    {
+      "title": "D'Aulaires' Book of Norse Myths",
+      "publisher": "NYR Children's Collection",
+      "confirmed": "2026-10-09",
+      "evidence": "User directed use of the NYRB editions discussed for Arm in Arm and D’Aulaires’ Book of Norse Myths. Exact printing not recorded.",
+      "source": "https://www.penguinrandomhouse.com/books/735325/daulaires-book-of-norse-myths-by-ingri-daulaire-edgar-parin-daulaire-preface-by-michael-chabon/9781681377889/"
+    },
+    {
+      "title": "The Children of Light",
+      "publisher": "New York Review Comics",
+      "confirmed": "2026-10-09",
+      "evidence": "User identified the light book among their NYRB editions. Existing record specifies the 2026 English translation by Luke Burns, matching the NYRB edition.",
+      "source": "https://www.nyrb.com/products/the-children-of-light"
+    },
+    {
+      "title": "D'Aulaires' Book of Animals",
+      "publisher": "NYR Children's Collection",
+      "confirmed": "2026-10-09",
+      "evidence": "User identified this among their NYRB books and confirmed it was read, not starred. Exact printing not recorded.",
+      "source": "https://www.nyrb.com/products/daulaires-book-of-animals"
+    },
+    {
+      "title": "D'Aulaires' Book of Trolls",
+      "publisher": "NYR Children's Collection",
+      "confirmed": "2026-10-09",
+      "evidence": "User identified this among their NYRB books and confirmed it was read, not starred. Exact printing not recorded.",
+      "source": "https://www.nyrb.com/products/daulaires-book-of-trolls"
+    },
+    {
+      "title": "Dinosaur!: Dinosaurs and Other Amazing Prehistoric Creatures as You've Never Seen Them Before",
+      "publisher": "DK",
+      "confirmed": "2026-10-09",
+      "evidence": "User supplied the DK/Smithsonian Dinosaur! revised-edition cover, matching the 2019 edition (ISBN 9781465481764). Original edition published in 2014.",
+      "source": "https://books.google.com/books?id=aLqpDwAAQBAJ"
+    }
+  ]
+}

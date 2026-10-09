@@ -16,7 +16,7 @@ The completion checklist is off by default; the "track your reading" toggle abov
 
 ### Publisher name normalization
 
-The analytics group exact `data-publisher` values. Use these canonical names for equivalent labels:
+Publisher analytics use `data-edition-publisher` when present, otherwise `data-publisher`, and combine exact publisher/imprint names. Use these canonical names for equivalent labels:
 
 | Canonical name | Equivalent labels |
 |---|---|
@@ -62,3 +62,11 @@ Full attribute list, award selectors, and more snippets: [selectors.md](selector
 ## Formerly Featured Quotes
 
 - "Books are a uniquely portable magic." — Stephen King, *On Writing: A Memoir of the Craft* (2000)
+
+### Edition publishers
+
+`data-publisher` retains the original publisher. Optional `data-edition-publisher` records the publisher or imprint of the edition read. Publisher analytics use the edition value when present, otherwise the original publisher. There is one imprint-level chart, with no parent-company grouping or edition/original view toggle.
+
+Populate edition overrides from the reader’s instructions or evidence about their copy, and record that evidence in `data/edition-publishers.json`. A catalogue entry for a matching title alone is insufficient. Missing edition information does not remove a book from publisher comparisons when an original publisher is known. The chart shows the top 12 publishers with at least three books. Buttons rank by total books or starred books; clicking a publisher opens its book list.
+
+Both publisher attributes are bibliographic metadata, not awards. Existing original-publication years and country fields do not change when recording an edition publisher.
