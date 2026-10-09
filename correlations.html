@@ -31,6 +31,16 @@
     .stats-table td:not(:first-child) { white-space: nowrap; font-variant-numeric: tabular-nums; }
     .stats-table tbody th { font-weight: normal; }
     .table-note { font-size: 0.8em; opacity: 0.75; }
+    #award-table { margin: 1.5em 0 0; opacity: 0.85; }
+    #award-table table { width: auto; max-width: 100%; margin: 0 auto; border-collapse: separate; border-spacing: 0.8em 0.1em; font-size: 0.8em; }
+    #award-table caption { text-align: center; font-size: 1em; font-weight: normal; margin-bottom: 0.4em; }
+    #award-table caption span { display: inline-block; color: #d4a017; border-bottom: 1px solid #444; padding-bottom: 0.2em; }
+    #award-table th, #award-table td { padding: 0; border: 0; }
+    #award-table th { font-weight: normal; opacity: 0.7; }
+    #award-table th:first-child { text-align: right; }
+    #award-table th:not(:first-child), #award-table td { text-align: left; }
+    #award-table td { font-weight: bold; }
+    #award-note { max-width: 65ch; margin: 0.8em auto 0; }
     #mongo svg { display: block; margin: 0 auto; }
     #mongo-query { text-align: center; font-size: 0.85em; margin: 0.5em 0; min-height: 1.5em; opacity: 0.7; }
     #mongo-book-list { margin-top: 1em; min-height: 2em; }
@@ -360,6 +370,9 @@
 
         var year = col.year;
         var books = byYear[year] || [];
+        // Draw from the baseline upward, with favourites forming a gold bar.
+        // This order is also used when filters re-stack the visible squares.
+        books.sort(function(a, b) { return Number(b.starred) - Number(a.starred); });
 
         books.forEach(function(book, i) {
           var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -1040,7 +1053,7 @@
       var table = document.createElement('table');
       table.className = 'stats-table';
       table.setAttribute('aria-describedby', 'award-note');
-      table.innerHTML = '<caption>Awards and favourites</caption><thead><tr>' +
+      table.innerHTML = '<caption><span>Awards and favourites</span></caption><thead><tr>' +
         '<th scope="col">Award</th><th scope="col">Books</th><th scope="col">Starred %</th><th scope="col">Lift</th>' +
         '</tr></thead><tbody></tbody>';
       var body = table.querySelector('tbody');
