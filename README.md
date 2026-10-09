@@ -33,6 +33,8 @@ Verified against publisher sources: [DK](https://dk.com/en-us/pages/permissions)
 
 The four existing `Alfred A. Knopf` entries were individually checked and assigned to Knopf Books for Young Readers: [Song and Dance Man](https://www.penguinrandomhouse.com/books/465/song-and-dance-man-by-karen-ackerman-illustrated-by-stephen-gammell/), [All Are Welcome](https://assets.penguinrandomhouse.com/book-resumes/PenfoldAlexandra_ALL%20ARE%20WELCOME.pdf), [Let's Make Music](https://www.penguinrandomhouse.com/books/678250/lets-make-music-an-all-are-welcome-board-book-by-alexandra-penfold-illustrated-by-suzanne-kaufman/), and [The Spice Box](https://penguinrandomhouseelementaryeducation.com/book/?isbn=9780593427156). Do not treat the adult Knopf imprint as an alias for the children's imprint.
 
+The `Little, Brown and Company` entry for [Fred Gets Dressed](https://www.littlebrownlibrary.com/titles/peter-brown-2/fred-gets-dressed/9780316200646/) was also assigned to its verified imprint, Little, Brown Books for Young Readers. This is a book-specific correction, not an alias between the adult and children’s divisions.
+
 This is name normalization, not an audit of every book's first edition. Ambiguous broader labels, such as Viking, Random House, or HarperCollins, need edition-specific evidence before assigning them to a particular imprint. Preserve Harper & Row, Houghton Mifflin, and other historical publishers rather than assigning their books to later owners.
 
 ## Suggest a book
