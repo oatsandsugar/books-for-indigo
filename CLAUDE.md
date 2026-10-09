@@ -32,6 +32,7 @@ Each book is a `<li>` with:
 - `data-caldecott-honor` — Caldecott Honor year (value = award year)
 - `data-nyt-illustrated` — NYT Best Illustrated year (value = award year)
 - `data-publisher` — original publisher name
+- Reuse the canonical publisher names in README.md. Normalize equivalent spellings; do not combine distinct imprints or historical publishers merely because they share an owner.
 - `data-recommended` — boolean attribute for community-recommended books (from GitHub issues)
 - `data-added` — date the book was added to the list (YYYY-MM-DD, approximate — based on commit date). JS shows a "NEW" badge for books added within the last 2 weeks.
 
