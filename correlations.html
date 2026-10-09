@@ -122,9 +122,10 @@
   <div id="authors"></div>
 
   <h2>Where Books Come From</h2>
-  <p class="table-note">Recorded country of origin. Select a country to see its books.</p>
+  <p class="table-note">Recorded country of origin. Starred % is the share of each country’s books that are starred. Select a country to see its books and counts.</p>
   <div class="viz-controls">
-    <button id="geo-all" type="button" aria-pressed="true">All books</button>
+    <button id="geo-rate" type="button" aria-pressed="true">Starred %</button>
+    <button id="geo-all" type="button" aria-pressed="false">All books</button>
     <button id="geo-starred" type="button" aria-pressed="false">Starred</button>
     <label for="geo-country">Country</label>
     <select id="geo-country"><option value="">All countries</option></select>
@@ -973,25 +974,25 @@
       });
       var names = new Intl.DisplayNames(['en'], { type: 'region' });
       var selector = document.getElementById('geo-country');
-      var starredOnly = false;
+      var mode = 'rate';
       var paths = [];
       var colors = ['#e5e5e5', '#c9dff1', '#98c3e4', '#5a9acb', '#28679e', '#123b65'];
       var golds = ['#e5e5e5', '#f5e8b7', '#ebd17b', '#d4a017', '#a67609', '#714e08'];
       var summary = document.getElementById('geo-summary');
       var list = document.getElementById('geo-list');
       function matching(code) {
-        return (countries[code] || []).filter(function(book) { return !starredOnly || book.hasAttribute('data-starred'); });
+        return (countries[code] || []).filter(function(book) { return mode !== 'starred' || book.hasAttribute('data-starred'); });
       }
       function countryLabel(code) {
         var all = countries[code] || [];
         var stars = all.filter(function(book) { return book.hasAttribute('data-starred'); }).length;
-        return names.of(code) + ': ' + all.length + ' books · ' + stars + ' starred';
+        return names.of(code) + ': ' + stars + ' of ' + all.length + ' starred (' + (stars / all.length * 100).toFixed(1) + '%)';
       }
       function overview() {
-        var counted = books.filter(function(book) { return !starredOnly || book.hasAttribute('data-starred'); });
+        var counted = books.filter(function(book) { return mode !== 'starred' || book.hasAttribute('data-starred'); });
         var known = counted.filter(function(book) { return book.hasAttribute('data-country'); });
         var countryCount = new Set(known.map(function(book) { return book.getAttribute('data-country'); })).size;
-        return countryCount + ' countries · ' + known.length + (starredOnly ? ' starred books' : ' books') +
+        return countryCount + ' countries · ' + known.length + (mode === 'starred' ? ' starred books' : ' books') +
           (counted.length > known.length ? ' · ' + (counted.length - known.length) + ' with unknown origin' : '');
       }
       function choose(code) {
@@ -1006,18 +1007,25 @@
       });
       function bucket(n) { return n === 0 ? 0 : n === 1 ? 1 : n < 5 ? 2 : n < 15 ? 3 : n < 50 ? 4 : 5; }
       function update() {
-        document.getElementById('geo-all').setAttribute('aria-pressed', String(!starredOnly));
-        document.getElementById('geo-starred').setAttribute('aria-pressed', String(starredOnly));
-        var palette = starredOnly ? golds : colors;
+        document.getElementById('geo-all').setAttribute('aria-pressed', String(mode === 'all'));
+        document.getElementById('geo-starred').setAttribute('aria-pressed', String(mode === 'starred'));
+        document.getElementById('geo-rate').setAttribute('aria-pressed', String(mode === 'rate'));
+        var palette = mode === 'rate' ? ['#e5e5e5', '#fff8df', '#f5e8b7', '#ebd17b', '#d4a017', '#a67609', '#714e08'] : mode === 'starred' ? golds : colors;
         paths.forEach(function(entry) {
           var count = matching(entry.code).length;
-          entry.path.setAttribute('fill', palette[bucket(count)]);
+          var index = bucket(count);
+          if (mode === 'rate') {
+            var all = countries[entry.code] || [];
+            var stars = all.filter(function(book) { return book.hasAttribute('data-starred'); }).length;
+            index = !all.length ? 0 : !stars ? 1 : Math.min(6, Math.floor(stars / all.length * 5) + 2);
+          }
+          entry.path.setAttribute('fill', palette[index]);
           entry.path.classList.toggle('selected', selector.value === entry.code);
           if (countries[entry.code]) entry.path.setAttribute('aria-pressed', String(selector.value === entry.code));
         });
         var legend = document.getElementById('geo-legend');
         legend.replaceChildren();
-        ['0', '1', '2–4', '5–14', '15–49', '50+'].forEach(function(label, i) {
+        (mode === 'rate' ? ['No books', '0%', '>0–<20%', '20–<40%', '40–<60%', '60–<80%', '80–100%'] : ['0', '1', '2–4', '5–14', '15–49', '50+']).forEach(function(label, i) {
           var key = document.createElement('span');
           var swatch = document.createElement('i');
           swatch.style.background = palette[i];
@@ -1026,12 +1034,13 @@
           legend.appendChild(key);
         });
         summary.textContent = selector.value ? countryLabel(selector.value) : overview();
-        if (selector.value) renderBookList(list, names.of(selector.value) + (starredOnly ? ' · starred' : ''), matching(selector.value));
+        if (selector.value) renderBookList(list, names.of(selector.value) + (mode === 'starred' ? ' · starred' : ''), matching(selector.value));
         else list.replaceChildren();
       }
       selector.addEventListener('change', update);
-      document.getElementById('geo-all').addEventListener('click', function() { starredOnly = false; update(); });
-      document.getElementById('geo-starred').addEventListener('click', function() { starredOnly = true; update(); });
+      document.getElementById('geo-rate').addEventListener('click', function() { mode = 'rate'; update(); });
+      document.getElementById('geo-all').addEventListener('click', function() { mode = 'all'; update(); });
+      document.getElementById('geo-starred').addEventListener('click', function() { mode = 'starred'; update(); });
       update();
       fetch('data/world-map.json').then(function(response) {
         if (!response.ok) throw new Error('Map unavailable');
