@@ -59,9 +59,11 @@
     .viz-controls button { border: 1px solid #8886; padding: 0.35em 0.7em; border-radius: 3px; }
     .viz-controls button[aria-pressed="true"] { border-color: currentColor; font-weight: bold; }
     #geo svg { display: block; width: 100%; height: auto; }
-    .map-country { stroke: #fff; stroke-width: 0.6; vector-effect: non-scaling-stroke; transition: filter 140ms ease; }
+    .map-country { stroke: #fff; stroke-width: 0.6; vector-effect: non-scaling-stroke; transition: filter 140ms ease, opacity 140ms ease; }
     .map-country[role="button"] { cursor: pointer; }
     .map-country[role="button"]:hover, .map-country.selected { filter: brightness(0.9); }
+    .map-country.range-muted { opacity: 0.2; filter: grayscale(1); }
+    .map-country.range-match { filter: brightness(0.95); }
     .map-country:focus { outline: none; }
     .map-country:focus-visible { stroke: #222; stroke-width: 1.8; }
     @media (prefers-reduced-motion: reduce) {
@@ -69,7 +71,10 @@
     }
     #geo-summary { min-height: 1.6em; margin: 0.5em 0; font-size: 0.85em; }
     .map-legend { display: flex; flex-wrap: wrap; gap: 1em; font-size: 0.75em; justify-content: center; }
-    .map-legend span { display: inline-flex; align-items: center; gap: 0.35em; }
+    .map-legend button { display: inline-flex; align-items: center; gap: 0.35em; padding: 0.3em 0.15em; border: 0; border-bottom: 2px solid transparent; font: inherit; color: inherit; background: transparent; cursor: pointer; }
+    .map-legend button:hover, .map-legend button[aria-pressed="true"] { border-bottom-color: currentColor; }
+    .map-legend button[aria-pressed="true"] { font-weight: bold; }
+    .country-result { padding: 0; border: 0; font: inherit; text-align: left; color: inherit; background: transparent; text-decoration: underline; text-underline-offset: 0.15em; cursor: pointer; }
     .map-legend i { display: inline-block; width: 1em; height: 0.7em; }
     .viz-book-list { font-size: 0.85em; }
     .viz-book-list ul { columns: 2; padding-left: 1.4em; }
@@ -127,7 +132,7 @@
   <div id="authors"></div>
 
   <h2>Where Books Come From</h2>
-  <p class="table-note">Recorded country of origin. Starred % is the share of each country’s books that are starred. Select a country to see its books and counts.</p>
+  <p class="table-note">Recorded country of origin. Starred % is the share of each country’s books that are starred. Select a country to see its books, or a legend range to find matching countries.</p>
   <div class="viz-controls">
     <button id="geo-rate" type="button" aria-pressed="true">Starred %</button>
     <button id="geo-all" type="button" aria-pressed="false">All books</button>
@@ -980,6 +985,8 @@
       var names = new Intl.DisplayNames(['en'], { type: 'region' });
       var selector = document.getElementById('geo-country');
       var mode = 'rate';
+      var activeBucket = null;
+      var legendMode = null;
       var paths = [];
       var colors = ['#e5e5e5', '#c9dff1', '#98c3e4', '#5a9acb', '#28679e', '#123b65'];
       var golds = ['#e5e5e5', '#f5e8b7', '#ebd17b', '#d4a017', '#a67609', '#714e08'];
@@ -1001,6 +1008,7 @@
           (counted.length > known.length ? ' · ' + (counted.length - known.length) + ' with unknown origin' : '');
       }
       function choose(code) {
+        activeBucket = null;
         selector.value = selector.value === code ? '' : code;
         update();
       }
@@ -1011,41 +1019,101 @@
         selector.appendChild(option);
       });
       function bucket(n) { return n === 0 ? 0 : n === 1 ? 1 : n < 5 ? 2 : n < 15 ? 3 : n < 50 ? 4 : 5; }
+      function countryBucket(code) {
+        if (mode !== 'rate') return bucket(matching(code).length);
+        var all = countries[code] || [];
+        var stars = all.filter(function(book) { return book.hasAttribute('data-starred'); }).length;
+        return !all.length ? 0 : !stars ? 1 : Math.min(6, Math.floor(stars / all.length * 5) + 2);
+      }
+      function rangeLabels() {
+        return mode === 'rate' ? ['No books', '0%', '>0–<20%', '20–<40%', '40–<60%', '60–<80%', '80–100%'] : ['0', '1', '2–4', '5–14', '15–49', '50+'];
+      }
+      function rangeCountries() {
+        return paths.filter(function(entry) { return countryBucket(entry.code) === activeBucket; })
+          .sort(function(a, b) { return a.name.localeCompare(b.name); });
+      }
+      function currentSummary() {
+        if (selector.value) return countryLabel(selector.value);
+        if (activeBucket !== null) {
+          var count = rangeCountries().length;
+          return rangeLabels()[activeBucket] + ' · ' + count + (count === 1 ? ' country' : ' countries') + ' on the map';
+        }
+        return overview();
+      }
+      function renderCountries() {
+        list.replaceChildren();
+        var heading = document.createElement('h3');
+        heading.textContent = (mode === 'rate' ? 'Starred %' : mode === 'starred' ? 'Starred books' : 'All books') + ': ' + rangeLabels()[activeBucket];
+        list.appendChild(heading);
+        var entries = rangeCountries();
+        if (!entries.length) {
+          var empty = document.createElement('p');
+          empty.textContent = 'No countries in this range.';
+          list.appendChild(empty);
+          return;
+        }
+        var results = document.createElement('ul');
+        entries.forEach(function(entry) {
+          var item = document.createElement('li');
+          if (countries[entry.code]) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'country-result';
+            button.textContent = countryLabel(entry.code);
+            button.addEventListener('click', function() { choose(entry.code); });
+            item.appendChild(button);
+          } else item.textContent = entry.name + ': no books';
+          results.appendChild(item);
+        });
+        list.appendChild(results);
+      }
       function update() {
         document.getElementById('geo-all').setAttribute('aria-pressed', String(mode === 'all'));
         document.getElementById('geo-starred').setAttribute('aria-pressed', String(mode === 'starred'));
         document.getElementById('geo-rate').setAttribute('aria-pressed', String(mode === 'rate'));
         var palette = mode === 'rate' ? ['#e5e5e5', '#fff8df', '#f5e8b7', '#ebd17b', '#d4a017', '#a67609', '#714e08'] : mode === 'starred' ? golds : colors;
         paths.forEach(function(entry) {
-          var count = matching(entry.code).length;
-          var index = bucket(count);
-          if (mode === 'rate') {
-            var all = countries[entry.code] || [];
-            var stars = all.filter(function(book) { return book.hasAttribute('data-starred'); }).length;
-            index = !all.length ? 0 : !stars ? 1 : Math.min(6, Math.floor(stars / all.length * 5) + 2);
-          }
+          var index = countryBucket(entry.code);
           entry.path.setAttribute('fill', palette[index]);
+          entry.path.classList.toggle('range-muted', activeBucket !== null && index !== activeBucket);
+          entry.path.classList.toggle('range-match', activeBucket !== null && index === activeBucket);
           entry.path.classList.toggle('selected', selector.value === entry.code);
           if (countries[entry.code]) entry.path.setAttribute('aria-pressed', String(selector.value === entry.code));
         });
         var legend = document.getElementById('geo-legend');
-        legend.replaceChildren();
-        (mode === 'rate' ? ['No books', '0%', '>0–<20%', '20–<40%', '40–<60%', '60–<80%', '80–100%'] : ['0', '1', '2–4', '5–14', '15–49', '50+']).forEach(function(label, i) {
-          var key = document.createElement('span');
-          var swatch = document.createElement('i');
-          swatch.style.background = palette[i];
-          key.appendChild(swatch);
-          key.appendChild(document.createTextNode(label));
-          legend.appendChild(key);
+        if (legendMode !== mode) {
+          legend.replaceChildren();
+          rangeLabels().forEach(function(label, i) {
+            var key = document.createElement('button');
+            key.type = 'button';
+            key.setAttribute('aria-controls', 'geo geo-list');
+            var swatch = document.createElement('i');
+            swatch.setAttribute('aria-hidden', 'true');
+            swatch.style.background = palette[i];
+            key.appendChild(swatch);
+            key.appendChild(document.createTextNode(label));
+            key.addEventListener('click', function() {
+              activeBucket = activeBucket === i ? null : i;
+              selector.value = '';
+              update();
+            });
+            legend.appendChild(key);
+          });
+          legendMode = mode;
+        }
+        Array.from(legend.children).forEach(function(key, i) {
+          key.setAttribute('aria-pressed', String(activeBucket === i));
         });
-        summary.textContent = selector.value ? countryLabel(selector.value) : overview();
+        summary.textContent = currentSummary();
         if (selector.value) renderBookList(list, names.of(selector.value) + (mode === 'starred' ? ' · starred' : ''), matching(selector.value));
+        else if (activeBucket !== null) renderCountries();
         else list.replaceChildren();
       }
-      selector.addEventListener('change', update);
-      document.getElementById('geo-rate').addEventListener('click', function() { mode = 'rate'; update(); });
-      document.getElementById('geo-all').addEventListener('click', function() { mode = 'all'; update(); });
-      document.getElementById('geo-starred').addEventListener('click', function() { mode = 'starred'; update(); });
+      selector.addEventListener('change', function() { activeBucket = null; update(); });
+      function changeMode(next) { mode = next; activeBucket = null; update(); }
+      document.getElementById('geo-rate').addEventListener('click', function() { changeMode('rate'); });
+      document.getElementById('geo-all').addEventListener('click', function() { changeMode('all'); });
+      document.getElementById('geo-starred').addEventListener('click', function() { changeMode('starred'); });
       update();
       fetch('data/world-map.json').then(function(response) {
         if (!response.ok) throw new Error('Map unavailable');
@@ -1073,10 +1141,10 @@
               if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(country.code); }
             });
             path.addEventListener('mouseenter', function() { summary.textContent = countryLabel(country.code); });
-            path.addEventListener('mouseleave', function() { summary.textContent = selector.value ? countryLabel(selector.value) : overview(); });
+            path.addEventListener('mouseleave', function() { summary.textContent = currentSummary(); });
           }
           svg.appendChild(path);
-          paths.push({ path: path, code: country.code });
+          paths.push({ path: path, code: country.code, name: countries[country.code] ? names.of(country.code) : country.name });
         });
         document.getElementById('geo').appendChild(svg);
         update();
